@@ -40,34 +40,34 @@ configure_tier() {
     
     case "$tier" in
         "admin")
-            DB_TIER_PORT="5433"
+            DB_TIER_PORT="7101"
             DB_TIER_CONTAINER="admin-postgres"
             DB_TIER_DATABASE="admin"
             DB_TIER_USER="admin"
             DB_TIER_PASSWORD="CCTech2024Admin!"
-            GRAPHQL_TIER_PORT="8100"
+            GRAPHQL_TIER_PORT="8101"
             GRAPHQL_TIER_CONTAINER="admin-graphql-server"
             GRAPHQL_TIER_ADMIN_SECRET="CCTech2024Admin"
             GRAPHQL_TIER_VOLUME="admin_graphql_metadata"
             ;;
         "operator")
-            DB_TIER_PORT="5434"
+            DB_TIER_PORT="7102"
             DB_TIER_CONTAINER="operator-postgres"
             DB_TIER_DATABASE="operator"
             DB_TIER_USER="operator"
             DB_TIER_PASSWORD="CCTech2024Operator!"
-            GRAPHQL_TIER_PORT="8101"
+            GRAPHQL_TIER_PORT="8102"
             GRAPHQL_TIER_CONTAINER="operator-graphql-server"
             GRAPHQL_TIER_ADMIN_SECRET="CCTech2024Operator"
             GRAPHQL_TIER_VOLUME="operator_graphql_metadata"
             ;;
         "member")
-            DB_TIER_PORT="5435"
+            DB_TIER_PORT="7103"
             DB_TIER_CONTAINER="member-postgres"
             DB_TIER_DATABASE="member"
             DB_TIER_USER="member"
             DB_TIER_PASSWORD="CCTech2024Member!"
-            GRAPHQL_TIER_PORT="8102"
+            GRAPHQL_TIER_PORT="8103"
             GRAPHQL_TIER_CONTAINER="member-graphql-server"
             GRAPHQL_TIER_ADMIN_SECRET="CCTech2024Member"
             GRAPHQL_TIER_VOLUME="member_graphql_metadata"

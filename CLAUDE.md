@@ -9,13 +9,18 @@ This is the **Shared GraphQL API** repository - a unified command framework that
 ## Architecture
 
 ### Tier Configuration
-The system manages three separate Hasura GraphQL APIs:
+The system manages three separate Hasura GraphQL APIs with clear sequential port numbering:
 
-| Tier     | Port | Container Name          | Database Port | Admin Secret        |
-|----------|------|-------------------------|---------------|---------------------|
-| admin    | 8100 | admin-graphql-server    | 5433         | CCTech2024Admin     |
-| operator | 8101 | operator-graphql-server | 5434         | CCTech2024Operator  |
-| member   | 8102 | member-graphql-server   | 5435         | CCTech2024Member    |
+| Tier     | GraphQL Port | Container Name          | PostgreSQL Port | Admin Secret        |
+|----------|--------------|-------------------------|-----------------|---------------------|
+| admin    | 8101         | admin-graphql-server    | 7101           | CCTech2024Admin     |
+| operator | 8102         | operator-graphql-server | 7102           | CCTech2024Operator  |
+| member   | 8103         | member-graphql-server   | 7103           | CCTech2024Member    |
+
+**Port Strategy**: 
+- GraphQL APIs use sequential ports 8101-8103 for easy identification
+- PostgreSQL databases use ports 7101-7103 to avoid conflicts with standard port 5432
+- Consistent numbering makes it clear which services belong together
 
 ### Integration with Tier Repositories
 Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`) that:
