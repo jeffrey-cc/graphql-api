@@ -26,9 +26,41 @@ Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `
 - No command folders - all commands centralized in this shared repository
 - No actions servers - pure Hasura GraphQL APIs using metadata-defined actions only
 
+## Deployment Process
+
+### ⚠️ CRITICAL: Always Use Docker Compose
+**GraphQL APIs MUST be deployed using docker-compose, NEVER standalone Docker containers.**
+
+Hasura Cloud deployments use containerized deployments, not docker-compose apps. To maintain consistency between development and production, always use docker-compose locally.
+
+### Local Development Deployment
+```bash
+# Deploy admin GraphQL API
+cd admin-graqhql-api && docker-compose up -d
+
+# Deploy operator GraphQL API  
+cd operator-graqhql-api && docker-compose up -d
+
+# Deploy member GraphQL API
+cd member-graqhql-api && docker-compose up -d
+
+# Stop any GraphQL API
+docker-compose down
+
+# Complete cleanup (removes volumes)
+docker-compose down -v
+```
+
+Each tier repository contains a `docker-compose.yml` that properly configures:
+- Network isolation per tier
+- Volume management for metadata persistence
+- Health checks and restart policies
+- Proper database connectivity via host.docker.internal
+- Consistent environment variables
+
 ## Common Development Commands
 
-All commands follow the pattern: `./command.sh <tier> <environment> [options]`
+All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
 ### Core Operations

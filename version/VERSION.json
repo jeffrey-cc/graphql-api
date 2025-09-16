@@ -1,0 +1,15 @@
+{
+  "version": "3.0.0.76",
+  "major": 3,
+  "minor": 0,
+  "patch": 0,
+  "build": 76,
+  "repository": "member-database-sql",
+  "tier": "member",
+  "git": {
+    "commit": "50d2e0e",
+    "branch": "main",
+    "dirty": true
+  },
+  "timestamp": "2025-09-15T23:53:54Z"
+}
