@@ -1,0 +1,23 @@
+# Ignore child GraphQL API repositories
+admin-graqhql-api/
+member-graqhql-api/
+operator-graqhql-api/
+
+# OS files
+.DS_Store
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
