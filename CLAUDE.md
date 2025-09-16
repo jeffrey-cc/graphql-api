@@ -4,214 +4,167 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Shared GraphQL API** repository - the central command hub that manages ALL GraphQL operations across three tiers (admin, operator, member) in the Community Connect Tech multi-tenant system. This repository contains the complete command infrastructure, while tier-specific configurations and metadata live in child repositories within this folder structure.
+This is the **Shared GraphQL API** repository - a unified command framework that manages GraphQL operations across three tiers (admin, operator, member) in the Community Connect Tech multi-tenant system. It provides parameterized commands that eliminate 95%+ code duplication and ensure consistency across all GraphQL API tiers.
 
-## 🏗️ Repository Structure
+## Architecture
 
-```
-shared-graphql-api/                # This repository (command hub)
-├── commands/                       # Operational commands (17 files)
-│   ├── _shared_functions.sh       # Core library with tier configuration
-│   ├── deploy-graphql.sh          # Deployment operations
-│   ├── docker-*.sh                # Docker management
-│   ├── track-*.sh                 # Table and relationship tracking
-│   ├── verify-*.sh                # Verification operations
-│   └── ...                        # Other operational commands
-├── testing/                        # Test and validation commands (7 files)
-│   ├── test-*.sh                  # Various test commands
-│   ├── load-test-data.sh         # Test data loading
-│   ├── purge-test-data.sh        # Test data cleanup
-│   └── speed-test-graphql.sh     # Performance testing
-├── admin-graqhql-api/             # Admin tier child repository
-│   ├── config/                    # Environment configurations
-│   │   ├── development.env       # Local development settings
-│   │   └── production.env        # Production settings
-│   ├── metadata/                  # Hasura metadata
-│   └── commands/                  # EMPTY (all commands migrated to parent)
-├── operator-graqhql-api/          # Operator tier child repository
-│   ├── config/                    # Environment configurations
-│   ├── metadata/                  # Hasura metadata
-│   └── commands/                  # EMPTY (all commands migrated to parent)
-└── member-graqhql-api/            # Member tier child repository
-    ├── config/                    # Environment configurations
-    ├── metadata/                  # Hasura metadata
-    └── commands/                  # EMPTY (all commands migrated to parent)
-```
+### Tier Configuration
+The system manages three separate Hasura GraphQL APIs:
 
-## 🎯 How It Works
+| Tier     | Port | Container Name          | Database Port | Admin Secret        |
+|----------|------|-------------------------|---------------|---------------------|
+| admin    | 8100 | admin-graphql-server    | 5433         | CCTech2024Admin     |
+| operator | 8101 | operator-graphql-server | 5434         | CCTech2024Operator  |
+| member   | 8102 | member-graphql-server   | 5435         | CCTech2024Member    |
 
-### Command Execution Pattern
+### Integration with Tier Repositories
+Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`) that:
+- Contains tier-specific metadata in `metadata/` directory (Hasura GraphQL metadata)
+- Stores environment configs in `config/` directory (development.env, production.env)
+- Contains actions server code in `actions/` directory (admin/operator only)
+- Includes testing data and scripts in `testing/` directory
+- Maintains version information in `version/` directory with automated versioning system
+- No command folders - all commands centralized in this shared repository
 
-**ALL commands are executed from this shared repository**, not from child repos:
+## Common Development Commands
 
+All commands follow the pattern: `./command.sh <tier> <environment> [options]`
+Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
+
+### Core Operations
 ```bash
-# ✅ CORRECT - Run from shared-graphql-api
-./commands/deploy-graphql.sh admin development
-./testing/test-graphql.sh operator production
+# Deploy GraphQL API with full introspection
+./commands/deploy-graphql.sh member development
 
-# ❌ WRONG - Do NOT run from child repos
-cd admin-graqhql-api && ./commands/some-command.sh  # NO COMMANDS HERE!
+# Fast metadata refresh (1-3 seconds)
+./commands/fast-refresh.sh admin development
+
+# Complete Docker rebuild (30-45 seconds)
+./commands/rebuild-docker.sh operator development
+
+# Track all database tables for GraphQL
+./commands/track-all-tables.sh member development
+
+# Track foreign key relationships
+./commands/track-relationships.sh admin development
 ```
 
-### Parameter Structure
-
-Every command follows this pattern:
+### Testing Workflow
 ```bash
-./[commands|testing]/command.sh <tier> <environment> [options]
+# Run complete 4-step test (purge → load → verify → purge)
+./testing/test-graphql.sh operator development
+
+# Individual test operations
+./testing/purge-test-data.sh member development
+./testing/load-test-data.sh admin development
 ```
 
-Where:
-- **tier**: `admin`, `operator`, or `member` (required)
-- **environment**: `development` or `production` (optional, defaults to development)
-- **options**: Command-specific flags like `--force`, `--verbose`, etc.
-
-### Configuration Flow
-
-1. **Command executed** from shared-graphql-api with tier parameter
-2. **`configure_tier()`** sets tier-specific variables and paths
-3. **`load_environment()`** loads config from child repo's `config/` folder
-4. **Command runs** using configurations from child repository
-5. **Metadata accessed** from child repo's `metadata/` folder if needed
-
-## 📋 Command Categories
-
-### Infrastructure & Docker Management
+### Docker Management
 ```bash
-./commands/docker-start.sh admin development       # Start containers
-./commands/docker-stop.sh operator production      # Stop containers
-./commands/docker-status.sh member development     # Check status
-./commands/rebuild-docker.sh admin development     # Full rebuild
+# Start Docker containers
+./commands/docker-start.sh member development
+
+# Check Docker status
+./commands/docker-status.sh admin development
+
+# Stop Docker containers
+./commands/docker-stop.sh operator development
 ```
 
-### Deployment & Metadata Management
+### Environment Management
 ```bash
-./commands/deploy-graphql.sh admin production      # Full deployment
-./commands/fast-refresh.sh operator development    # Quick refresh (< 3s)
-./commands/refresh-graphql.sh member development   # Metadata refresh
-./commands/fast-rebuild.sh admin development       # Rebuild from metadata
-./commands/drop-graphql.sh operator development    # Clean shutdown
-```
+# Compare dev vs production environments
+./commands/compare-environments.sh member
 
-### Table & Relationship Tracking
-```bash
-./commands/track-all-tables.sh admin development   # Track all tables
-./commands/track-relationships.sh operator production  # Track FKs
-./commands/track-relationships-smart.sh member development  # Smart naming
-```
-
-### Verification & Reporting
-```bash
-./commands/verify-complete-setup.sh admin development  # Full verification
-./commands/verify-tables-tracked.sh operator production  # Table check
-./commands/audit-database.sh member development    # Database audit
-./commands/report-graphql.sh admin production      # Status report
-./commands/compare-environments.sh operator        # Compare dev vs prod
-```
-
-### Testing & Validation
-```bash
-./testing/test-graphql.sh admin development        # Complete test suite
-./testing/test-connection.sh operator production   # Basic connectivity
-./testing/test-connections.sh member development   # Comprehensive test
-./testing/test-comprehensive-dataset.sh admin development  # Full validation
-./testing/speed-test-graphql.sh operator compare   # Performance test
-./testing/load-test-data.sh member development     # Load test data
-./testing/purge-test-data.sh admin production      # Clean test data
-```
-
-## 🔧 Technical Implementation
-
-### Tier Configuration System
-
-The `_shared_functions.sh` library provides `configure_tier()` which sets:
-
-```bash
-# For tier = "admin"
-DB_TIER_PORT="5433"
-DB_TIER_CONTAINER="admin-postgres"
-DB_TIER_DATABASE="admin"
-GRAPHQL_TIER_PORT="8100"
-GRAPHQL_TIER_CONTAINER="admin-graphql-server"
-GRAPHQL_TIER_ADMIN_SECRET="CCTech2024Admin"
-
-# Path configuration (points to child repos)
-TIER_REPOSITORY_PATH="${SHARED_ROOT}/admin-graqhql-api"
-TIER_CONFIG_DIR="$TIER_REPOSITORY_PATH/config"
-TIER_METADATA_DIR="$TIER_REPOSITORY_PATH/metadata"
-```
-
-### Environment Configuration Loading
-
-The `load_environment()` function:
-1. Loads from `$TIER_CONFIG_DIR/${environment}.env`
-2. Sources all environment variables
-3. Sets up database and GraphQL endpoints
-4. Configures Hasura admin secrets
-
-### Command Workflow
-
-1. **Parse Arguments**: Extract tier, environment, and options
-2. **Configure Tier**: Call `configure_tier()` to set tier-specific variables
-3. **Load Environment**: Call `load_environment()` to load configs from child repo
-4. **Execute Operation**: Run the command logic using loaded configurations
-5. **Access Metadata**: Read/write metadata from child repo's `metadata/` folder
-6. **Return Status**: Provide colored output with success/error status
-
-## 📊 Tier Configuration Reference
-
-| Tier     | Port | Container Name          | Database Port | Database | Admin Secret        |
-|----------|------|-------------------------|---------------|----------|---------------------|
-| admin    | 8100 | admin-graphql-server    | 5433         | admin    | CCTech2024Admin     |
-| operator | 8101 | operator-graphql-server | 5434         | operator | CCTech2024Operator  |
-| member   | 8102 | member-graphql-server   | 5435         | member   | CCTech2024Member    |
-
-## 🚀 Deployment Workflow
-
-### Development Deployment
-```bash
-# 1. Start Docker containers
-./commands/docker-start.sh admin development
-
-# 2. Deploy GraphQL with table tracking
-./commands/deploy-graphql.sh admin development
-
-# 3. Verify setup
+# Verify complete setup
 ./commands/verify-complete-setup.sh admin development
 
-# 4. Run tests
-./testing/test-graphql.sh admin development
+# Test GraphQL connections
+./commands/test-connections.sh operator development
 ```
 
-### Production Deployment
+## Code Architecture
+
+### Directory Structure
+- `commands/` - Main GraphQL operations (18 commands)
+  - `_shared_functions.sh` - Core library with tier configuration system
+  - All other scripts source this file and use `configure_tier()` function
+- `testing/` - Testing framework (7 commands)
+  - Implements 4-step workflow: purge → load → verify → purge
+- Tier repositories (`admin-graqhql-api/`, `operator-graqhql-api/`, `member-graqhql-api/`) contain:
+  - `metadata/` - Hasura GraphQL metadata exports
+  - `config/` - Environment configurations (development.env, production.env)
+  - `actions/` - Custom business logic servers (admin/operator only)
+  - `testing/` - Tier-specific test data and scripts
+  - `scripts/` - Version management and utility scripts
+  - `version/` - Automated versioning system (VERSION.json, docker labels, etc.)
+
+### Key Functions in _shared_functions.sh
+- `configure_tier()` - Sets all tier-specific variables (ports, containers, credentials)
+- `load_environment()` - Loads development/production configurations
+- `execute_graphql_query()` - Runs GraphQL queries with proper authentication
+- `track_database_tables()` - Auto-discovers and tracks database objects
+- `track_foreign_keys()` - Analyzes and tracks relationship metadata
+
+### Command Workflow Pattern
+1. Source `_shared_functions.sh`
+2. Parse arguments (tier, environment)
+3. Call `configure_tier()` to set variables
+4. Load environment configuration
+5. Execute tier-specific operations
+6. Return standardized output with color coding
+
+## Integration Status
+
+✅ **All Tiers Fully Integrated**: 
+- `admin-graqhql-api` - Complete GraphQL API with actions server
+- `operator-graqhql-api` - Complete GraphQL API with actions server  
+- `member-graqhql-api` - Complete GraphQL API (actions server to be implemented)
+
+Each tier maintains only essential files (metadata, configs, testing data) with 100% command consolidation in shared system.
+
+## Versioning System
+
+All three repositories include an automated versioning system:
+
+### Version Structure: `3.0.0.{build}-{commit}-{status}`
+- **Base Version**: 3.0.0 (current major release)
+- **Build Number**: Auto-incremented from git commit count
+- **Commit SHA**: Short git commit hash
+- **Status**: `-dirty` if uncommitted changes exist
+
+### Generated Files (in each `version/` folder):
 ```bash
-# 1. Compare environments first
-./commands/compare-environments.sh operator
-
-# 2. Deploy to production (requires confirmation)
-./commands/deploy-graphql.sh operator production
-
-# 3. Verify deployment
-./commands/verify-complete-setup.sh operator production
-
-# 4. Generate report
-./commands/report-graphql.sh operator production
+version/
+├── VERSION.json        # Complete version metadata
+├── VERSION.txt         # Simple version string
+├── docker-labels.txt   # Docker LABEL commands
+└── update-hasura-version.sql  # Database version tracking
 ```
 
-## ⚠️ Important Notes
+### Usage:
+```bash
+# View version information
+./scripts/get-version.sh
 
-### No Commands in Child Repositories
-- **ALL commands removed** from child repos (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`)
-- **Child repos only contain**: `config/`, `metadata/`, and other tier-specific resources
-- **100% command consolidation** achieved in this shared repository
+# Generate/update all version files
+./scripts/get-version.sh --write
+
+# Version files auto-update on each commit to main
+```
+
+The versioning system automatically updates package.json files and generates database scripts to track API versions in the database.
+
+## Important Notes
 
 ### Production Safety
 - All production operations require explicit confirmation
-- Use `--force` flag to skip confirmations in scripts
 - Destructive operations show clear warnings
+- Commands support `--force` flag to skip confirmations
 
 ### Performance Targets
 - Fast refresh: < 3 seconds
-- Table tracking: < 10 seconds
+- Table tracking: < 10 seconds  
 - Docker rebuild: < 45 seconds
 - Complete test workflow: < 60 seconds
 
@@ -221,50 +174,61 @@ The `load_environment()` function:
 - Command duration tracking with performance reporting
 - Detailed logging with `--verbose` flag support
 
-## 🔍 Resource Discovery
-
+### Resource Discovery
 Commands automatically discover:
 - Database tables, views, and functions via introspection
 - Foreign key relationships for nested GraphQL queries
 - Metadata from tier repository `metadata/` directories
 - Environment configs from tier repository `config/` directories
 
-## 📦 Dependencies
+## Commands Available in Shared System
+
+### Core Commands (17 in commands/)
+- `deploy-graphql.sh` - Full GraphQL deployment with metadata
+- `fast-refresh.sh` - Lightning-fast metadata refresh
+- `rebuild-docker.sh` - Complete Docker container rebuild
+- `docker-start.sh` - Start Docker containers
+- `docker-stop.sh` - Stop Docker containers
+- `docker-status.sh` - Check container status
+- `track-all-tables.sh` - Auto-discover and track database tables
+- `track-relationships.sh` - Track foreign key relationships
+- `verify-complete-setup.sh` - Comprehensive setup validation
+- `verify-tables-tracked.sh` - Verify table tracking status
+- `test-connection.sh` - Basic connectivity test
+- `test-connections.sh` - Comprehensive connection testing
+- `test-comprehensive-dataset.sh` - Full dataset validation
+- `compare-environments.sh` - Dev vs production comparison
+- `load-seed-data.sh` - Load tier-specific seed data
+- `purge-test-data.sh` - Clean test data from database
+- `_shared_functions.sh` - Core library (not called directly)
+
+### Testing Commands (3 in testing/)
+- `test-graphql.sh` - Complete 4-step test workflow
+- `load-test-data.sh` - Load test data
+- `purge-test-data.sh` - Purge test data
+
+## Tier-Specific Commands Not Yet Migrated
+
+These commands exist in individual tier repositories but could be candidates for shared implementation:
+
+### Common Across Multiple Tiers
+- `drop-graphql.sh` - Clean GraphQL shutdown (all tiers)
+- `fast-rebuild.sh` - Fast rebuild from metadata (all tiers)
+- `report-graphql.sh` - Status reporting (all tiers)
+- `speed-test-graphql.sh` - Performance benchmarking (all tiers)
+- `track-relationships-smart.sh` - Smart relationship naming (admin, operator)
+- `audit-database.sh` - Database auditing (admin, operator)
+
+### Tier-Specific Commands
+- **Admin**: `setup-jwt-permissions.sh`, `track-array-relationships.sh`
+- **Operator**: `enable-rls.sh`, `configure-hasura-permissions.sh`, `configure-departmental-permissions.sh`
+- **Member**: Various data loading commands for comprehensive testing
+
+## Dependencies
 
 - Hasura CLI for metadata management
 - Docker and Docker Compose for development
 - PostgreSQL client tools (`psql`)
 - curl for API interactions
 - jq for JSON processing (optional but recommended)
-- bash 4.0+ for advanced scripting features
-
-## 🎯 Key Benefits of This Architecture
-
-1. **Single Source of Truth**: All commands in one place
-2. **Zero Duplication**: No repeated code across tiers
-3. **Consistent Behavior**: Same command works for all tiers
-4. **Easy Maintenance**: Update once, works everywhere
-5. **Clear Separation**: Commands vs configurations
-6. **Tier Independence**: Each tier maintains its own configs/metadata
-7. **Simplified Testing**: One test suite for all tiers
-
-## 🚦 Quick Start
-
-```bash
-# Check status of all tiers
-for tier in admin operator member; do
-  ./commands/docker-status.sh $tier development
-done
-
-# Deploy all tiers
-for tier in admin operator member; do
-  ./commands/deploy-graphql.sh $tier development
-done
-
-# Test all tiers
-for tier in admin operator member; do
-  ./testing/test-graphql.sh $tier development
-done
-```
-
-This architecture ensures maximum code reuse, consistency, and maintainability across the entire multi-tenant GraphQL system.
+- Access to sibling tier repositories (`../*-graqhql-api/`)
