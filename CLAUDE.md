@@ -63,77 +63,121 @@ Each tier repository contains a `docker-compose.yml` that properly configures:
 - Proper database connectivity via host.docker.internal
 - Consistent environment variables
 
-## Common Development Commands
+## Complete Command Reference
 
 All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
-### Core Operations
+### Core Deployment & Management Commands (commands/)
+
+#### Primary Operations
 ```bash
-# Deploy GraphQL API with full introspection
-./commands/deploy-graphql.sh member development
+# Full GraphQL API deployment with metadata and table tracking
+./commands/deploy-graphql.sh <tier> <environment>
 
-# Fast metadata refresh (1-3 seconds)
-./commands/fast-refresh.sh admin development
+# Lightning-fast metadata refresh without container restart (1-3 seconds)
+./commands/fast-refresh.sh <tier> <environment>
 
-# Complete Docker rebuild (30-45 seconds)
-./commands/rebuild-docker.sh operator development
-
-# Track all database tables for GraphQL
-./commands/track-all-tables.sh member development
-
-# Track foreign key relationships
-./commands/track-relationships.sh admin development
+# Complete Docker container rebuild (nuclear option, 30-45 seconds)
+./commands/rebuild-docker.sh <tier> <environment>
 ```
 
-### Testing Workflow
+#### Docker Container Management
+```bash
+# Start GraphQL container using docker-compose
+./commands/docker-start.sh <tier> <environment>
+
+# Stop GraphQL container
+./commands/docker-stop.sh <tier> <environment>
+
+# Check Docker container status
+./commands/docker-status.sh <tier> <environment>
+
+# Restart GraphQL service with health check
+./commands/restart-graphql.sh <tier> [environment]
+```
+
+#### Schema & Table Management
+```bash
+# Auto-discover and track all database tables
+./commands/track-all-tables.sh <tier> <environment>
+
+# Track foreign key relationships for nested queries
+./commands/track-relationships.sh <tier> <environment>
+```
+
+#### Verification & Health Checks
+```bash
+# Comprehensive setup verification
+./commands/verify-complete-setup.sh <tier> <environment>
+
+# Verify all tables are properly tracked
+./commands/verify-tables-tracked.sh <tier> <environment>
+
+# Test GraphQL health endpoints
+./commands/test-health.sh [tier|all] [environment]
+
+# Check status of all services (databases + GraphQL)
+./commands/status-all.sh [simple|detailed|json]
+```
+
+#### Environment Management
+```bash
+# Compare development vs production environments
+./commands/compare-environments.sh <tier>
+```
+
+### Testing Commands (testing/)
+
+#### Complete Test Workflow
 ```bash
 # Run complete 4-step test (purge → load → verify → purge)
-./testing/test-graphql.sh operator development
+./testing/test-graphql.sh <tier> <environment>
 
-# Individual test operations
-./testing/purge-test-data.sh member development
-./testing/load-test-data.sh admin development
+# Test basic GraphQL connectivity
+./testing/test-connection.sh <tier> <environment>
 ```
 
-### Docker Management
+#### Test Data Management
 ```bash
-# Start Docker containers
-./commands/docker-start.sh member development
+# Load test data into database
+./testing/load-test-data.sh <tier> <environment>
 
-# Check Docker status
-./commands/docker-status.sh admin development
-
-# Stop Docker containers
-./commands/docker-stop.sh operator development
-```
-
-### Environment Management
-```bash
-# Compare dev vs production environments
-./commands/compare-environments.sh member
-
-# Verify complete setup
-./commands/verify-complete-setup.sh admin development
-
-# Test GraphQL connections
-./commands/test-connections.sh operator development
+# Purge all test data from database
+./testing/purge-test-data.sh <tier> <environment>
 ```
 
 ## Code Architecture
 
 ### Directory Structure
-- `commands/` - Main GraphQL operations (12 commands)
-  - `_shared_functions.sh` - Core library with tier configuration system
-  - All other scripts source this file and use `configure_tier()` function
-- `testing/` - Testing framework (4 commands)
-  - Implements 4-step workflow: purge → load → verify → purge
-- Tier repositories (`admin-graqhql-api/`, `operator-graqhql-api/`, `member-graqhql-api/`) contain:
-  - `metadata/` - Hasura GraphQL metadata exports
-  - `config/` - Environment configurations (development.env, production.env)
-  - `testing/` - Tier-specific test data and scripts
-  - `scripts/` - Version management and utility scripts
-  - `version/` - Automated versioning system (VERSION.json, docker labels, etc.)
+```
+shared-graphql-api/
+├── commands/                     # Main GraphQL operations (15 commands)
+│   ├── _shared_functions.sh     # Core library with tier configuration
+│   ├── deploy-graphql.sh        # Full deployment with metadata
+│   ├── fast-refresh.sh          # Quick metadata refresh
+│   ├── rebuild-docker.sh        # Complete Docker rebuild
+│   ├── docker-start.sh          # Start containers
+│   ├── docker-stop.sh           # Stop containers
+│   ├── docker-status.sh         # Check container status
+│   ├── restart-graphql.sh       # Restart with health check
+│   ├── track-all-tables.sh      # Auto-track database tables
+│   ├── track-relationships.sh   # Track foreign keys
+│   ├── verify-complete-setup.sh # Full setup validation
+│   ├── verify-tables-tracked.sh # Verify table tracking
+│   ├── test-health.sh           # Health endpoint testing
+│   ├── status-all.sh            # System-wide status check
+│   └── compare-environments.sh  # Dev vs prod comparison
+├── testing/                      # Testing framework (4 commands)
+│   ├── test-graphql.sh          # Complete test workflow
+│   ├── test-connection.sh       # Basic connectivity test
+│   ├── load-test-data.sh        # Load test fixtures
+│   └── purge-test-data.sh       # Clean test data
+└── Tier repositories (../)      # Individual tier repos
+    ├── admin-graqhql-api/
+    ├── operator-graqhql-api/
+    └── member-graqhql-api/
+```
 
 ### Key Functions in _shared_functions.sh
 - `configure_tier()` - Sets all tier-specific variables (ports, containers, credentials)
@@ -149,47 +193,6 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 4. Load environment configuration
 5. Execute tier-specific operations
 6. Return standardized output with color coding
-
-## Integration Status
-
-✅ **All Tiers Fully Integrated**: 
-- `admin-graqhql-api` - Complete GraphQL API with standardized structure
-- `operator-graqhql-api` - Complete GraphQL API with standardized structure  
-- `member-graqhql-api` - Complete GraphQL API with standardized structure
-
-Each tier maintains only essential files (metadata, configs, testing data) with 100% command consolidation in shared system.
-
-## Versioning System
-
-All three repositories include an automated versioning system:
-
-### Version Structure: `3.0.0.{build}-{commit}-{status}`
-- **Base Version**: 3.0.0 (current major release)
-- **Build Number**: Auto-incremented from git commit count
-- **Commit SHA**: Short git commit hash
-- **Status**: `-dirty` if uncommitted changes exist
-
-### Generated Files (in each `version/` folder):
-```bash
-version/
-├── VERSION.json        # Complete version metadata
-├── VERSION.txt         # Simple version string
-├── docker-labels.txt   # Docker LABEL commands
-└── update-hasura-version.sql  # Database version tracking
-```
-
-### Usage:
-```bash
-# View version information
-./scripts/get-version.sh
-
-# Generate/update all version files
-./scripts/get-version.sh --write
-
-# Version files auto-update on each commit to main
-```
-
-The versioning system automatically updates package.json files and generates database scripts to track API versions in the database.
 
 ## Important Notes
 
@@ -217,27 +220,42 @@ Commands automatically discover:
 - Metadata from tier repository `metadata/` directories
 - Environment configs from tier repository `config/` directories
 
-## Commands Available in Shared System
+## Command Usage Examples
 
-### Core Commands (12 in commands/)
-- `deploy-graphql.sh` - Full GraphQL deployment with metadata
-- `fast-refresh.sh` - Lightning-fast metadata refresh
-- `rebuild-docker.sh` - Complete Docker container rebuild
-- `docker-start.sh` - Start Docker containers
-- `docker-stop.sh` - Stop Docker containers
-- `docker-status.sh` - Check container status
-- `track-all-tables.sh` - Auto-discover and track database tables
-- `track-relationships.sh` - Track foreign key relationships
-- `verify-complete-setup.sh` - Comprehensive setup validation
-- `verify-tables-tracked.sh` - Verify table tracking status
-- `compare-environments.sh` - Dev vs production comparison
-- `_shared_functions.sh` - Core library (not called directly)
+### Deploy GraphQL API for development
+```bash
+./commands/deploy-graphql.sh admin development
+```
 
-### Testing Commands (4 in testing/)
-- `test-graphql.sh` - Complete 4-step test workflow
-- `load-test-data.sh` - Load test data
-- `purge-test-data.sh` - Purge test data
-- `test-connection.sh` - Basic connectivity test
+### Quick refresh after database changes
+```bash
+./commands/fast-refresh.sh operator development
+```
+
+### Check health of all services
+```bash
+./commands/test-health.sh all development
+```
+
+### View system-wide status
+```bash
+./commands/status-all.sh simple
+```
+
+### Restart a specific tier
+```bash
+./commands/restart-graphql.sh member development
+```
+
+### Run complete test suite
+```bash
+./testing/test-graphql.sh admin development
+```
+
+### Compare dev vs production
+```bash
+./commands/compare-environments.sh operator
+```
 
 ## Tier-Specific Commands Not Yet Migrated
 
