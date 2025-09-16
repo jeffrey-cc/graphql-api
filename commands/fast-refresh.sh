@@ -95,11 +95,16 @@ fi
 # Check prerequisites
 check_prerequisites
 
+# Configure endpoint for the environment
+if ! configure_endpoint "$TIER" "$ENVIRONMENT"; then
+    die "Failed to configure endpoint for $TIER ($ENVIRONMENT)"
+fi
+
 section_header "🔄 SHARED GRAPHQL FAST REFRESH - $(echo $TIER | tr '[:lower:]' '[:upper:]') TIER"
 log_info "Tier: $TIER"
 log_info "Environment: $ENVIRONMENT"
 log_info "Start Time: $(date '+%Y-%m-%d %H:%M:%S')"
-log_info "Endpoint: http://localhost:$GRAPHQL_TIER_PORT"
+log_info "Endpoint: $GRAPHQL_TIER_ENDPOINT"
 
 # Start timing
 start_timer
@@ -116,16 +121,6 @@ if ! reload_metadata "$TIER" "$ENVIRONMENT"; then
     
     # Call Docker rebuild script from shared system
     exec "$SCRIPT_DIR/rebuild-docker.sh" "$TIER" "$ENVIRONMENT"
-fi
-
-# Reload schema cache
-log_progress "Reloading schema cache..."
-local endpoint="http://localhost:$GRAPHQL_TIER_PORT"
-local response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-  '{"type": "reload_remote_schema", "args": {}}' "Reload schema cache")
-
-if [[ "$response" == *"success"* ]] || [[ "$response" == *"message"* ]]; then
-    log_success "Schema cache reloaded successfully"
 fi
 
 # Verify GraphQL schema is working

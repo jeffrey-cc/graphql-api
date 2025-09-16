@@ -105,25 +105,19 @@ get_schema_info() {
     # Load environment-specific configuration
     load_tier_config "$TIER" "$environment" || true
     
-    # Determine endpoint based on environment
-    if [[ "$environment" == "development" ]]; then
-        port="$GRAPHQL_TIER_PORT"
-        endpoint="http://localhost:$port"
-    else
-        # For production, we'd need the production endpoint
-        # This would typically come from the tier's production.env
-        if [[ -n "$HASURA_GRAPHQL_ENDPOINT" ]]; then
-            endpoint="$HASURA_GRAPHQL_ENDPOINT"
-        else
-            log_error "Production endpoint not configured for $TIER"
-            return 1
-        fi
+    # Configure endpoint for the environment
+    if ! configure_endpoint "$TIER" "$environment"; then
+        log_error "Failed to configure endpoint for $TIER ($environment)"
+        return 1
     fi
+    
+    # Use the configured endpoint
+    endpoint="$GRAPHQL_TIER_ENDPOINT"
     
     log_detail "Testing $environment endpoint: $endpoint"
     
     # Test basic connectivity
-    local admin_secret="${HASURA_GRAPHQL_ADMIN_SECRET:-$GRAPHQL_TIER_ADMIN_SECRET}"
+    local admin_secret="$GRAPHQL_TIER_ADMIN_SECRET"
     local introspection_query='{"query": "query { __schema { queryType { name } mutationType { name } subscriptionType { name } types { name kind } } }"}'
     
     local response=$(curl -s \

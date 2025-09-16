@@ -101,11 +101,16 @@ fi
 # Check prerequisites
 check_prerequisites
 
+# Configure endpoint for the environment
+if ! configure_endpoint "$TIER" "$ENVIRONMENT"; then
+    die "Failed to configure endpoint for $TIER ($ENVIRONMENT)"
+fi
+
 section_header "📋 SHARED GRAPHQL TABLE TRACKING - $(echo $TIER | tr '[:lower:]' '[:upper:]') TIER"
 log_info "Tier: $TIER"
 log_info "Environment: $ENVIRONMENT"
 log_info "Database: $DB_TIER_DATABASE at localhost:$DB_TIER_PORT"
-log_info "GraphQL: http://localhost:$GRAPHQL_TIER_PORT"
+log_info "GraphQL: $GRAPHQL_TIER_ENDPOINT"
 
 # Start timing
 start_timer

@@ -254,6 +254,12 @@ load_tier_config() {
     if [[ -f "$env_file" ]]; then
         log_debug "Loading environment file: $env_file"
         source "$env_file"
+        
+        # Override admin secret if defined in config file (for production)
+        if [[ -n "$HASURA_GRAPHQL_ADMIN_SECRET" ]]; then
+            GRAPHQL_TIER_ADMIN_SECRET="$HASURA_GRAPHQL_ADMIN_SECRET"
+            log_debug "Using admin secret from config file"
+        fi
     else
         log_warning "Environment file not found: $env_file"
         return 1

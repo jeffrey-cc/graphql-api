@@ -6,6 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is the **Shared GraphQL API** repository - a unified command framework that manages GraphQL operations across three tiers (admin, operator, member) in the Community Connect Tech multi-tenant system. It provides parameterized commands that eliminate 95%+ code duplication and ensure consistency across all GraphQL API tiers.
 
+## Hierarchical Context
+
+### Position in System Architecture
+- **Parent Directory**: `/Users/cc/Desktop/v3/` (Master orchestration folder for 12-repository system)
+- **Current Location**: `/Users/cc/Desktop/v3/shared-graphql-api/` (Shared GraphQL command center)
+- **Child Repositories**: 
+  - `../admin-graqhql-api/` (Admin tier GraphQL API)
+  - `../operator-graqhql-api/` (Operator tier GraphQL API)
+  - `../member-graqhql-api/` (Member tier GraphQL API)
+- **Sibling System**: `../shared-database-sql/` (Centralized database management)
+
+### Role in Three-Tier Architecture
+This repository serves as the **central nervous system** for all GraphQL operations across the platform:
+- **Centralized Commands**: Single source of truth for GraphQL operations
+- **Tier Abstraction**: Parameterized commands work across admin, operator, and member tiers
+- **Integration Hub**: Coordinates with both database and portal layers
+- **Standards Enforcement**: Ensures consistency in deployment, testing, and management
+
 ## Architecture
 
 ### Tier Configuration
@@ -22,14 +40,22 @@ The system manages three separate Hasura GraphQL APIs with clear sequential port
 - PostgreSQL databases use ports 7101-7103 to avoid conflicts with standard port 5432
 - Consistent numbering makes it clear which services belong together
 
-### Integration with Tier Repositories
+### Integration with Child Repositories
 Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`) that:
 - Contains tier-specific metadata in `metadata/` directory (Hasura GraphQL metadata)
 - Stores environment configs in `config/` directory (development.env, production.env)
 - Includes testing data and scripts in `testing/` directory
 - Maintains version information in `version/` directory with automated versioning system
-- No command folders - all commands centralized in this shared repository
+- Uses wrapper commands that delegate to this shared repository
+- Maintains their own CLAUDE.md with tier-specific business context
 - No actions servers - pure Hasura GraphQL APIs using metadata-defined actions only
+
+### Child Repository Command Pattern
+Child repositories use wrapper commands that:
+1. Load their local `config/shared-settings.env` configuration
+2. Validate the shared system path exists (`../shared-graphql-api`)
+3. Execute the shared command with their tier parameter
+4. Example: `admin-graqhql-api/commands/deploy-graphql-shared.sh` → calls → `shared-graphql-api/commands/deploy-graphql.sh admin development`
 
 ## Deployment Process
 
@@ -274,6 +300,29 @@ These commands exist in individual tier repositories but could be candidates for
 - **Operator**: `enable-rls.sh`, `configure-hasura-permissions.sh`, `configure-departmental-permissions.sh`
 - **Member**: Various data loading commands for comprehensive testing
 
+## System Relationships
+
+### Upstream Dependencies (Parent System)
+- **Master Orchestrator** (`/Users/cc/Desktop/v3/`): Coordinates cross-repository operations
+- **Shared Database SQL** (`../shared-database-sql/`): Database schemas that GraphQL APIs expose
+  - Changes in database schemas require GraphQL metadata refresh
+  - Table and relationship tracking must match database structure
+  - Testing data loaded via database commands before GraphQL testing
+
+### Downstream Consumers (Child Repositories)
+- **Admin GraphQL API** (`../admin-graqhql-api/`): Franchisor operations
+- **Operator GraphQL API** (`../operator-graqhql-api/`): Facility management
+- **Member GraphQL API** (`../member-graqhql-api/`): Member operations
+  - Each maintains tier-specific business logic and metadata
+  - All delegate command execution to this shared system
+  - Each has specialized CLAUDE.md for their domain context
+
+### Sibling Systems (Parallel Layers)
+- **React Portals** (`../*-portal-react/`): Consume GraphQL APIs
+- **Seed Data** (`../*-seed-data/`): Populate databases for testing
+  - Portal testing depends on GraphQL API availability
+  - Seed data must be loaded after GraphQL deployment
+
 ## Dependencies
 
 - Hasura CLI for metadata management
@@ -281,4 +330,4 @@ These commands exist in individual tier repositories but could be candidates for
 - PostgreSQL client tools (`psql`)
 - curl for API interactions
 - jq for JSON processing (optional but recommended)
-- Access to sibling tier repositories (`../*-graqhql-api/`)
+- Access to child tier repositories (`../*-graqhql-api/`)
