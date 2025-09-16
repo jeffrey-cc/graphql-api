@@ -78,8 +78,8 @@ configure_tier() {
             ;;
     esac
     
-    # Set tier-specific paths
-    TIER_REPOSITORY_PATH="../${tier}-graqhql-api"
+    # Set tier-specific paths (child repos are now inside shared-graphql-api)
+    TIER_REPOSITORY_PATH="${SHARED_ROOT}/${tier}-graqhql-api"
     TIER_CONFIG_DIR="$TIER_REPOSITORY_PATH/config"
     TIER_METADATA_DIR="$TIER_REPOSITORY_PATH/metadata"
     TIER_TESTING_DIR="$TIER_REPOSITORY_PATH/testing"
