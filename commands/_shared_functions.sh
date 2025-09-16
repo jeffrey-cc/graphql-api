@@ -96,6 +96,35 @@ configure_tier() {
     return 0
 }
 
+# Load environment configuration for a tier
+load_environment() {
+    local tier="$1"
+    local environment="$2"
+    
+    local config_file="$TIER_CONFIG_DIR/${environment}.env"
+    
+    if [ ! -f "$config_file" ]; then
+        log_error "Configuration file not found: $config_file"
+        return 1
+    fi
+    
+    # Source the configuration file
+    source "$config_file"
+    
+    # Set derived variables
+    if [ "$environment" == "development" ]; then
+        GRAPHQL_ENDPOINT="http://localhost:$GRAPHQL_TIER_PORT"
+    else
+        # For production, use the endpoint from config file
+        GRAPHQL_ENDPOINT="${HASURA_ENDPOINT:-$HASURA_GRAPHQL_ENDPOINT}"
+    fi
+    
+    log_debug "Configuration loaded from: $config_file"
+    log_debug "GraphQL Endpoint: $GRAPHQL_ENDPOINT"
+    
+    return 0
+}
+
 # ============================================================================
 # ENDPOINT CONFIGURATION SYSTEM
 # ============================================================================
@@ -186,6 +215,39 @@ section_header() {
     echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}${CYAN}$1${NC}"
     echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
+# Print header for commands
+print_header() {
+    local title="$1"
+    echo ""
+    echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${CYAN}🔧 ${title}${NC}"
+    echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
+# Print summary with timing and error counts
+print_summary() {
+    end_timer
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}📊 SUMMARY${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    if [ $COMMAND_ERRORS -eq 0 ]; then
+        echo -e "${GREEN}✅ Status: SUCCESS${NC}"
+    else
+        echo -e "${RED}❌ Status: COMPLETED WITH ERRORS${NC}"
+        echo -e "${RED}   Errors: $COMMAND_ERRORS${NC}"
+    fi
+    
+    if [ $COMMAND_WARNINGS -gt 0 ]; then
+        echo -e "${YELLOW}⚠️  Warnings: $COMMAND_WARNINGS${NC}"
+    fi
+    
+    if [ ! -z "$START_TIME" ]; then
+        local duration=$(($(date +%s) - START_TIME))
+        echo -e "${BLUE}⏱️  Duration: ${duration}s${NC}"
+    fi
 }
 
 # ============================================================================
