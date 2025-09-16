@@ -86,10 +86,10 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 ## Code Architecture
 
 ### Directory Structure
-- `commands/` - Main GraphQL operations (18 commands)
+- `commands/` - Main GraphQL operations (12 commands)
   - `_shared_functions.sh` - Core library with tier configuration system
   - All other scripts source this file and use `configure_tier()` function
-- `testing/` - Testing framework (7 commands)
+- `testing/` - Testing framework (4 commands)
   - Implements 4-step workflow: purge → load → verify → purge
 - Tier repositories (`admin-graqhql-api/`, `operator-graqhql-api/`, `member-graqhql-api/`) contain:
   - `metadata/` - Hasura GraphQL metadata exports
@@ -183,7 +183,7 @@ Commands automatically discover:
 
 ## Commands Available in Shared System
 
-### Core Commands (17 in commands/)
+### Core Commands (12 in commands/)
 - `deploy-graphql.sh` - Full GraphQL deployment with metadata
 - `fast-refresh.sh` - Lightning-fast metadata refresh
 - `rebuild-docker.sh` - Complete Docker container rebuild
@@ -194,18 +194,14 @@ Commands automatically discover:
 - `track-relationships.sh` - Track foreign key relationships
 - `verify-complete-setup.sh` - Comprehensive setup validation
 - `verify-tables-tracked.sh` - Verify table tracking status
-- `test-connection.sh` - Basic connectivity test
-- `test-connections.sh` - Comprehensive connection testing
-- `test-comprehensive-dataset.sh` - Full dataset validation
 - `compare-environments.sh` - Dev vs production comparison
-- `load-seed-data.sh` - Load tier-specific seed data
-- `purge-test-data.sh` - Clean test data from database
 - `_shared_functions.sh` - Core library (not called directly)
 
-### Testing Commands (3 in testing/)
+### Testing Commands (4 in testing/)
 - `test-graphql.sh` - Complete 4-step test workflow
 - `load-test-data.sh` - Load test data
 - `purge-test-data.sh` - Purge test data
+- `test-connection.sh` - Basic connectivity test
 
 ## Tier-Specific Commands Not Yet Migrated
 

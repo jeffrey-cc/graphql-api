@@ -12,7 +12,7 @@ set -e
 
 # Source shared functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/_shared_functions.sh"
+source "$SCRIPT_DIR/../commands/_shared_functions.sh"
 
 # Show help information
 show_help() {
@@ -199,43 +199,6 @@ else
     TESTS_FAILED=$((TESTS_FAILED + 1))
 fi
 
-# Test 6: Console accessibility (development only)
-if [[ "$ENVIRONMENT" == "development" ]]; then
-    log_progress "6. Testing console accessibility..."
-    if curl -s -f -o /dev/null "${GRAPHQL_TIER_ENDPOINT}/console" 2>/dev/null; then
-        log_success "✓ Console is accessible"
-        log_detail "URL: ${GRAPHQL_TIER_ENDPOINT}/console"
-        TESTS_PASSED=$((TESTS_PASSED + 1))
-    else
-        log_warning "⚠ Console not accessible"
-        log_detail "This may be normal if console is disabled"
-    fi
-fi
-
-# Test 7: List available queries (detailed mode)
-if [[ "$DETAILED" == "true" ]]; then
-    log_progress "7. Checking available queries..."
-    SCHEMA_QUERY=$(curl -s -X POST "${GRAPHQL_TIER_ENDPOINT}/v1/graphql" \
-        -H "Content-Type: application/json" \
-        -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
-        -d '{"query":"{ __schema { queryType { fields { name } } } }"}' 2>/dev/null)
-
-    if [[ "$SCHEMA_QUERY" == *"fields"* ]]; then
-        QUERY_COUNT=$(echo "$SCHEMA_QUERY" | jq '.data.__schema.queryType.fields | length' 2>/dev/null || echo "0")
-        log_success "✓ Schema query successful"
-        log_detail "Available queries: $QUERY_COUNT"
-        
-        # Show sample queries
-        if [[ "$QUERY_COUNT" -gt 0 ]]; then
-            log_detail "Sample queries:"
-            echo "$SCHEMA_QUERY" | jq -r '.data.__schema.queryType.fields[:5][].name' 2>/dev/null | sed 's/^/     - /' || true
-        fi
-        TESTS_PASSED=$((TESTS_PASSED + 1))
-    else
-        log_warning "⚠ Could not retrieve schema"
-    fi
-fi
-
 # Summary
 section_header "📊 CONNECTION TEST SUMMARY"
 log_info "Tier: $TIER"
@@ -259,9 +222,9 @@ fi
 # Additional tips based on environment
 if [[ "$ENVIRONMENT" == "development" ]]; then
     log_info "💡 Development tips:"
-    log_detail "• Check Docker status: ./docker-status.sh $TIER $ENVIRONMENT"
-    log_detail "• View logs: ./docker-status.sh $TIER $ENVIRONMENT --logs"
-    log_detail "• Restart services: ./docker-stop.sh $TIER $ENVIRONMENT && ./docker-start.sh $TIER $ENVIRONMENT"
+    log_detail "• Check Docker status: ./commands/docker-status.sh $TIER $ENVIRONMENT"
+    log_detail "• View logs: ./commands/docker-status.sh $TIER $ENVIRONMENT --logs"
+    log_detail "• Restart services: ./commands/docker-stop.sh $TIER $ENVIRONMENT && ./commands/docker-start.sh $TIER $ENVIRONMENT"
 else
     log_info "💡 Production tips:"
     log_detail "• Verify Hasura Cloud project is active"
