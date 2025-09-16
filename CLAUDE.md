@@ -21,10 +21,10 @@ The system manages three separate Hasura GraphQL APIs:
 Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`) that:
 - Contains tier-specific metadata in `metadata/` directory (Hasura GraphQL metadata)
 - Stores environment configs in `config/` directory (development.env, production.env)
-- Contains actions server code in `actions/` directory (admin/operator only)
 - Includes testing data and scripts in `testing/` directory
 - Maintains version information in `version/` directory with automated versioning system
 - No command folders - all commands centralized in this shared repository
+- No actions servers - pure Hasura GraphQL APIs using metadata-defined actions only
 
 ## Common Development Commands
 
@@ -94,7 +94,6 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 - Tier repositories (`admin-graqhql-api/`, `operator-graqhql-api/`, `member-graqhql-api/`) contain:
   - `metadata/` - Hasura GraphQL metadata exports
   - `config/` - Environment configurations (development.env, production.env)
-  - `actions/` - Custom business logic servers (admin/operator only)
   - `testing/` - Tier-specific test data and scripts
   - `scripts/` - Version management and utility scripts
   - `version/` - Automated versioning system (VERSION.json, docker labels, etc.)
@@ -117,9 +116,9 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 ## Integration Status
 
 ✅ **All Tiers Fully Integrated**: 
-- `admin-graqhql-api` - Complete GraphQL API with actions server
-- `operator-graqhql-api` - Complete GraphQL API with actions server  
-- `member-graqhql-api` - Complete GraphQL API (actions server to be implemented)
+- `admin-graqhql-api` - Complete GraphQL API with standardized structure
+- `operator-graqhql-api` - Complete GraphQL API with standardized structure  
+- `member-graqhql-api` - Complete GraphQL API with standardized structure
 
 Each tier maintains only essential files (metadata, configs, testing data) with 100% command consolidation in shared system.
 
