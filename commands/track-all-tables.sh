@@ -130,10 +130,10 @@ fi
 # Get table count for verification
 log_progress "Verifying tracked tables..."
 
-local endpoint="http://localhost:$GRAPHQL_TIER_PORT"
-local introspection_query='{"query": "query { __schema { types { name kind } } }"}'
+endpoint="http://localhost:$GRAPHQL_TIER_PORT"
+introspection_query='{"query": "query { __schema { types { name kind } } }"}'
 
-local response=$(curl -s \
+response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$introspection_query" \
@@ -141,7 +141,7 @@ local response=$(curl -s \
 
 if [[ "$response" == *'"data"'* ]]; then
     # Count table types in GraphQL schema
-    local table_count=$(echo "$response" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
+    table_count=$(echo "$response" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
     
     if [[ "$table_count" =~ ^[0-9]+$ && "$table_count" -gt 0 ]]; then
         log_success "Verified: $table_count table types available in GraphQL schema"
@@ -155,15 +155,15 @@ fi
 # Test a simple query to ensure tables are accessible
 log_progress "Testing table accessibility..."
 
-local test_query='{"query": "query { __type(name: \"Query\") { fields { name type { name } } } }"}'
-local test_response=$(curl -s \
+test_query='{"query": "query { __type(name: \"Query\") { fields { name type { name } } } }"}'
+test_response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$test_query" \
     "$endpoint/v1/graphql" 2>/dev/null)
 
 if [[ "$test_response" == *'"data"'* ]]; then
-    local query_count=$(echo "$test_response" | jq -r '.data.__type.fields[]?.name' 2>/dev/null | wc -l | xargs)
+    query_count=$(echo "$test_response" | jq -r '.data.__type.fields[]?.name' 2>/dev/null | wc -l | xargs)
     
     if [[ "$query_count" =~ ^[0-9]+$ && "$query_count" -gt 0 ]]; then
         log_success "Verified: $query_count queries available"

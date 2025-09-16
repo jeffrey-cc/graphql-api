@@ -131,11 +131,11 @@ fi
 # Advanced relationship analysis and verification
 log_progress "Analyzing relationship tracking results..."
 
-local endpoint="http://localhost:$GRAPHQL_TIER_PORT"
-local db_url="postgresql://$DB_TIER_USER:$DB_TIER_PASSWORD@localhost:$DB_TIER_PORT/$DB_TIER_DATABASE"
+endpoint="http://localhost:$GRAPHQL_TIER_PORT"
+db_url="postgresql://$DB_TIER_USER:$DB_TIER_PASSWORD@localhost:$DB_TIER_PORT/$DB_TIER_DATABASE"
 
 # Get foreign key count from database
-local fk_count=$(psql "$db_url" -t -c "
+fk_count=$(psql "$db_url" -t -c "
     SELECT COUNT(*)
     FROM information_schema.table_constraints tc
     JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
@@ -146,8 +146,8 @@ local fk_count=$(psql "$db_url" -t -c "
 log_detail "Database foreign keys found: $fk_count"
 
 # Get GraphQL relationship count via introspection
-local relationship_query='{"query": "query { __schema { types { name fields { name type { name ofType { name } } } } } }"}'
-local relationship_response=$(curl -s \
+relationship_query='{"query": "query { __schema { types { name fields { name type { name ofType { name } } } } } }"}'
+relationship_response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$relationship_query" \
@@ -155,7 +155,7 @@ local relationship_response=$(curl -s \
 
 if [[ "$relationship_response" == *'"data"'* ]]; then
     # Count relationship fields (approximate - fields that end with common relationship patterns)
-    local graphql_relationships=$(echo "$relationship_response" | jq -r '
+    graphql_relationships=$(echo "$relationship_response" | jq -r '
         .data.__schema.types[]? |
         select(.name and (.name | startswith("__") | not)) |
         .fields[]? |
@@ -178,7 +178,7 @@ fi
 log_progress "Testing relationship functionality..."
 
 # Try to find a table with relationships for testing
-local test_table=$(psql "$db_url" -t -c "
+test_table=$(psql "$db_url" -t -c "
     SELECT tc.table_name
     FROM information_schema.table_constraints tc
     WHERE tc.constraint_type = 'FOREIGN KEY'
@@ -190,8 +190,8 @@ if [[ -n "$test_table" ]]; then
     log_detail "Testing relationships with table: $test_table"
     
     # Try a simple relationship query
-    local test_rel_query="{\"query\": \"query { $test_table { __typename } }\"}"
-    local test_rel_response=$(curl -s \
+    test_rel_query="{\"query\": \"query { $test_table { __typename } }\"}"
+    test_rel_response=$(curl -s \
         -H "Content-Type: application/json" \
         -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
         -d "$test_rel_query" \

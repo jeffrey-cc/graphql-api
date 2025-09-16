@@ -160,8 +160,8 @@ fi
 
 if [[ $DEV_STATUS -eq 0 && $PROD_STATUS -eq 0 ]]; then
     # Compare type counts
-    local dev_types=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
-    local prod_types=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
+    dev_types=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
+    prod_types=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | wc -l | xargs)
     
     log_detail "Development types: $dev_types"
     log_detail "Production types: $prod_types"
@@ -174,8 +174,8 @@ if [[ $DEV_STATUS -eq 0 && $PROD_STATUS -eq 0 ]]; then
     fi
     
     # Compare query/mutation availability
-    local dev_has_query=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.queryType.name' 2>/dev/null)
-    local prod_has_query=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.queryType.name' 2>/dev/null)
+    dev_has_query=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.queryType.name' 2>/dev/null)
+    prod_has_query=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.queryType.name' 2>/dev/null)
     
     if [[ "$dev_has_query" == "$prod_has_query" ]]; then
         log_success "Query types match: $dev_has_query"
@@ -184,8 +184,8 @@ if [[ $DEV_STATUS -eq 0 && $PROD_STATUS -eq 0 ]]; then
         ((COMMAND_WARNINGS++))
     fi
     
-    local dev_has_mutation=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.mutationType.name' 2>/dev/null)
-    local prod_has_mutation=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.mutationType.name' 2>/dev/null)
+    dev_has_mutation=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.mutationType.name' 2>/dev/null)
+    prod_has_mutation=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.mutationType.name' 2>/dev/null)
     
     if [[ "$dev_has_mutation" == "$prod_has_mutation" ]]; then
         log_success "Mutation types match: $dev_has_mutation"
@@ -198,12 +198,12 @@ if [[ $DEV_STATUS -eq 0 && $PROD_STATUS -eq 0 ]]; then
     if [[ "$DETAILED" == "true" ]]; then
         log_progress "Generating detailed comparison..."
         
-        local dev_type_list=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | sort)
-        local prod_type_list=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | sort)
+        dev_type_list=$(echo "$DEV_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | sort)
+        prod_type_list=$(echo "$PROD_SCHEMA" | jq -r '.data.__schema.types[] | select(.kind == "OBJECT" and (.name | startswith("__") | not)) | .name' 2>/dev/null | sort)
         
         # Find differences
-        local dev_only=$(comm -23 <(echo "$dev_type_list") <(echo "$prod_type_list") 2>/dev/null)
-        local prod_only=$(comm -13 <(echo "$dev_type_list") <(echo "$prod_type_list") 2>/dev/null)
+        dev_only=$(comm -23 <(echo "$dev_type_list") <(echo "$prod_type_list") 2>/dev/null)
+        prod_only=$(comm -13 <(echo "$dev_type_list") <(echo "$prod_type_list") 2>/dev/null)
         
         if [[ -n "$dev_only" ]]; then
             log_warning "Types only in development:"
