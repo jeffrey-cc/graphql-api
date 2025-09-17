@@ -1,0 +1,7 @@
+guid,name,color,kind,operator_role,company_type,is_active,first_name,last_name,legal_name,email_address,phone_number,deposit_balance,balance
+11111111-1111-1111-1111-111111111111,Downtown Kitchen Facility,#FF6B6B,2,,1,true,,,Downtown Kitchen Facility Ltd.,admin@downtownkitchen.com,416-555-0101,5000.00,2500.00
+22222222-2222-2222-2222-222222222222,Sarah Johnson,#4ECDC4,1,4,,true,Sarah,Johnson,Sarah Elizabeth Johnson,sarah.johnson@downtownkitchen.com,416-555-0102,0.00,1250.00
+33333333-3333-3333-3333-333333333333,Michael Chen,#95E1D3,1,4,,true,Michael,Chen,Michael Wei Chen,michael.chen@downtownkitchen.com,416-555-0103,0.00,800.00
+44444444-4444-4444-4444-444444444444,Vancouver Food Hub,#FFA07A,2,,1,true,,,Vancouver Food Hub Inc.,operations@vancouverfoodhub.ca,604-555-0201,7500.00,4200.00
+55555555-5555-5555-5555-555555555555,Lisa Wong,#F8B195,1,4,,true,Lisa,Wong,Lisa Marie Wong,lisa.wong@vancouverfoodhub.ca,604-555-0202,0.00,950.00
+66666666-6666-6666-6666-666666666666,David Kim,#B8A9C9,1,4,,true,David,Kim,David Seung Kim,david.kim@vancouverfoodhub.ca,604-555-0203,0.00,600.00

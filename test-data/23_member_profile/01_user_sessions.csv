@@ -1,0 +1,6 @@
+user_id,session_token,ip_address,user_agent,device_type,created_at,last_activity_at,expires_at,is_active
+1,sess_token_mike_001,192.168.1.100,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36,desktop,2024-09-16 09:00:00+00,2024-09-16 09:15:00+00,2024-09-17 09:00:00+00,true
+2,sess_token_sarah_002,192.168.1.101,Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15,mobile,2024-09-16 08:45:00+00,2024-09-16 09:00:00+00,2024-09-17 08:45:00+00,true
+3,sess_token_alex_003,10.0.0.50,Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36,desktop,2024-09-16 08:30:00+00,2024-09-16 08:50:00+00,2024-09-17 08:30:00+00,true
+5,sess_token_james_005,172.16.0.25,Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15,tablet,2024-09-16 08:00:00+00,2024-09-16 08:30:00+00,2024-09-17 08:00:00+00,true
+6,sess_token_lisa_006,192.168.2.200,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36,desktop,2024-09-16 07:30:00+00,2024-09-16 08:00:00+00,2024-09-17 07:30:00+00,true

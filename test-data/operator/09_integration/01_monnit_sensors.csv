@@ -1,0 +1,15 @@
+vendor_id,name,last_updated,minimum_threshold,maximum_threshold,facility_id
+358608,401 - Left fridge,,0,8,1
+358617,401 - Right fridge,,0,8,1
+358587,401 - Upstairs fridge,,0,8,1
+372885,LAUREL - Fast Cooler,,0,8,5
+372884,LAUREL - Fast Freezer,,-30,-15,5
+372888,LAUREL - Holding Cooler,,0,8,5
+372890,LAUREL - Upstairs Cooler,,0,8,4
+770206,Lazy Cooler 1,,0,6,3
+770209,Lazy Freezer 1,,-25,0,3
+358619,417,,0,8,2
+770214,Freezer 2,,-34.5,-17.8,3
+1062106,Lazy Cooler 2,,0,8,3
+1210159,Surrey Cooler Left,,0,6,8
+1210151,Surrey Cooler Right,,0,6,8

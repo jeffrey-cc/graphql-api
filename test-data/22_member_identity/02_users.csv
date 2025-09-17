@@ -1,0 +1,9 @@
+company_id,email,password_hash,first_name,last_name,phone_number,role,status,is_verified,last_login_at,created_at,updated_at
+1,mike@artisanpizza.com,hash_mike123,Mike,Chen,416-555-8001,owner,active,true,2024-09-16 09:00:00+00,2024-09-16 08:00:00+00,2024-09-16 08:00:00+00
+1,sarah@artisanpizza.com,hash_sarah456,Sarah,Johnson,416-555-8002,manager,active,true,2024-09-16 08:45:00+00,2024-09-16 08:05:00+00,2024-09-16 08:05:00+00
+2,alex@cloudburgers.ca,hash_alex789,Alex,Rodriguez,604-555-8003,owner,active,true,2024-09-16 08:30:00+00,2024-09-16 08:10:00+00,2024-09-16 08:10:00+00
+2,priya@cloudburgers.ca,hash_priya321,Priya,Patel,604-555-8004,staff,active,true,2024-09-16 07:15:00+00,2024-09-16 08:15:00+00,2024-09-16 08:15:00+00
+3,james@freshfusion.to,hash_james654,James,Kim,647-555-8005,owner,active,true,2024-09-16 08:00:00+00,2024-09-16 08:20:00+00,2024-09-16 08:20:00+00
+3,lisa@freshfusion.to,hash_lisa987,Lisa,Wong,647-555-8006,manager,active,true,2024-09-16 07:30:00+00,2024-09-16 08:25:00+00,2024-09-16 08:25:00+00
+4,david@healthyeats.ca,hash_david147,David,Thompson,416-555-8007,owner,pending_verification,false,,2024-09-16 08:30:00+00,2024-09-16 08:30:00+00
+5,maria@streettacos.ca,hash_maria258,Maria,Gonzalez,905-555-8008,owner,active,true,2024-09-16 06:45:00+00,2024-09-16 08:35:00+00,2024-09-16 08:35:00+00
