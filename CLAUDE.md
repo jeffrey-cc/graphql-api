@@ -94,6 +94,42 @@ Each tier repository contains a `docker-compose.yml` that properly configures:
 All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
+### 📚 Complete Command Index
+
+#### Core Operations (Most Used)
+- `fast-refresh.sh` - Reload metadata only (1-3 seconds) ⚡
+- `rebuild-docker.sh` - Complete container rebuild (dev only, 30-45s) 🔨
+- `deploy-graphql.sh` - Full deployment with metadata
+- `test-health.sh` - Check GraphQL health status
+
+#### Comparison & Analysis
+- `compare-schema-deep.sh` - Deep schema introspection comparison 🔍
+- `compare-environments.sh` - Basic environment comparison
+- `compare-tables.sh` - Compare tracked tables
+- `count-records.sh` - Count all records per table
+
+#### Test Data Management
+- `test-all-comprehensive.sh` - Run all tier tests with report 📊
+- `test-graphql-data-workflow.sh` - Complete test workflow
+- `purge-{tier}-test-data-via-graphql.sh` - Purge tier data
+- `load-{tier}-test-data-via-graphql.sh` - Load tier data
+
+#### Docker Management
+- `docker-start.sh` - Start containers
+- `docker-stop.sh` - Stop containers
+- `docker-status.sh` - Check container status
+- `restart-graphql.sh` - Restart with health check
+
+#### Schema Management
+- `track-all-tables.sh` - Auto-track all tables
+- `track-relationships.sh` - Track foreign keys
+- `verify-tables-tracked.sh` - Verify tracking
+- `verify-complete-setup.sh` - Full setup verification
+
+#### System Status
+- `status-all.sh` - System-wide status check
+- `setup-production.sh` - Configure production
+
 ## GraphQL Test Data Management
 
 ### Test Data Structure
@@ -212,10 +248,48 @@ curl -s -X POST -H "Content-Type: application/json" \
 ./commands/status-all.sh [simple|detailed|json]
 ```
 
-#### Environment Management
+#### Environment Management & Comparison
 ```bash
-# Compare development vs production environments
+# Compare development vs production environments (basic)
 ./commands/compare-environments.sh <tier>
+
+# Deep schema comparison with full introspection
+./commands/compare-schema-deep.sh <tier> [--detailed]
+
+# Compare tracked tables between environments
+./commands/compare-tables.sh <tier>
+
+# Count records in all tables for any environment
+./commands/count-records.sh <tier> <environment>
+```
+
+#### Test Data Management
+```bash
+# Purge test data for specific tier
+./commands/purge-admin-test-data-via-graphql.sh <environment>
+./commands/purge-operator-test-data-via-graphql.sh <environment>
+./commands/purge-member-test-data-via-graphql.sh <environment>
+
+# Load test data for specific tier
+./commands/load-admin-test-data-via-graphql.sh <environment>
+./commands/load-operator-test-data-via-graphql.sh <environment>
+./commands/load-member-test-data-via-graphql.sh <environment>
+
+# Run complete test workflow (purge → load → verify)
+./commands/test-graphql-data-workflow.sh <tier> <environment>
+
+# Test all tiers comprehensively
+./commands/test-all-tiers-graphql.sh
+./commands/test-all-comprehensive.sh
+```
+
+#### Production Setup & Management
+```bash
+# Setup production environment
+./commands/setup-production.sh <tier>
+
+# Full rebuild (Docker in dev, refresh in prod)
+./commands/full-rebuild.sh <tier> <environment>
 ```
 
 ### Testing Commands (testing/)
