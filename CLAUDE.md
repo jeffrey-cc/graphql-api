@@ -388,6 +388,58 @@ These commands exist in individual tier repositories but could be candidates for
   - Portal testing depends on GraphQL API availability
   - Seed data must be loaded after GraphQL deployment
 
+## ⚠️ CRITICAL COMMAND DISTINCTIONS - NO AMBIGUITY
+
+### REBUILD vs REFRESH - Precise Definitions
+
+#### 🔴 **REBUILD** Command
+When the user says **"rebuild"**, this means:
+
+**In Development**:
+```bash
+docker-compose down -v   # Completely destroy container and volumes
+docker-compose up -d     # Create brand new container from scratch
+```
+- **Deletes the entire Docker container**
+- **Removes all volumes and metadata**
+- **Creates fresh instance with zero state**
+- **Takes 30-45 seconds**
+- **Nuclear option - complete destruction and recreation**
+
+**In Production**:
+- **CANNOT be done** - no Docker containers exist
+- **Automatically falls back to REFRESH** (see below)
+- Should acknowledge: "Cannot rebuild production (no Docker), performing refresh instead..."
+
+#### 🟢 **REFRESH** Command  
+When the user says **"refresh"**, this means:
+
+**In Both Development AND Production**:
+```bash
+./commands/fast-refresh.sh <tier> <environment>
+```
+- **Reloads metadata only**
+- **Clears schema cache**
+- **Re-tracks tables and relationships**
+- **Container/instance keeps running**
+- **Takes 1-3 seconds**
+- **Lightweight operation - no destruction**
+
+### Command Matrix - ABSOLUTE CLARITY
+
+| User Says | Environment | What I Do | Duration |
+|-----------|------------|-----------|----------|
+| "rebuild" | Development | `docker-compose down -v && docker-compose up -d` | 30-45s |
+| "rebuild" | Production | `fast-refresh.sh` (fallback - cannot truly rebuild) | 1-3s |
+| "refresh" | Development | `fast-refresh.sh` | 1-3s |
+| "refresh" | Production | `fast-refresh.sh` | 1-3s |
+
+### Key Understanding
+- **REBUILD = Destroy and recreate** (dev only)
+- **REFRESH = Reload configuration** (both envs)
+- **Production limitation**: Can NEVER truly rebuild (managed service)
+- **No ambiguity**: These are distinct, non-interchangeable operations
+
 ## Dependencies
 
 - Hasura CLI for metadata management
