@@ -1,0 +1,11 @@
+ticket_number,company_id,title,description,category_id,priority,severity,ticket_type,status,resolution_status
+TICK-001,1,Unable to login to operator portal,User reports authentication error when trying to access the operator portal,2,high,critical,bug,open,
+TICK-002,2,Missing invoice for last month,Customer has not received their monthly invoice,6,medium,minor,issue,in_progress,
+TICK-003,3,Request for bulk user import feature,Customer wants ability to import multiple users via CSV,14,low,minor,feature_request,pending,
+TICK-004,1,System running slow during peak hours,Performance degradation reported between 11am-2pm,3,medium,major,issue,resolved,resolved
+TICK-005,4,Payment processing failed,Credit card payment declined with unclear error message,7,urgent,critical,bug,escalated,
+TICK-006,2,Need training on new features,Request for training session on recently launched features,12,low,minor,request,closed,resolved
+TICK-007,3,Data sync not working,Integration with external system stopped syncing 2 days ago,4,high,major,bug,in_progress,
+TICK-008,5,Account locked after password reset,User cannot access account after password reset attempt,2,critical,blocker,bug,waiting_customer,
+TICK-009,1,Feature request: Dark mode,Request to add dark mode theme option,14,low,minor,feature_request,open,
+TICK-010,4,Incorrect billing amount,Charged wrong amount on recent invoice,6,high,major,issue,resolved,workaround

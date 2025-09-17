@@ -1,0 +1,7 @@
+id,lead_id,pipeline_stage,probability,estimated_value,expected_close_date,last_activity_date,notes
+1,1,prospect,10,8000.00,2024-03-15,2024-01-20,Initial contact made
+2,2,qualified,30,6500.00,2024-03-30,2024-01-22,Qualifying requirements
+3,3,proposal,60,10000.00,2024-02-28,2024-01-25,Proposal sent for review
+4,4,negotiation,75,5000.00,2024-02-15,2024-01-26,Negotiating contract terms
+5,5,contract,90,12000.00,2024-02-10,2024-01-28,Contract under review
+6,3,closed,100,10000.00,2024-01-30,2024-01-30,Deal closed successfully

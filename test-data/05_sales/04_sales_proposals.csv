@@ -1,0 +1,7 @@
+id,proposal_id,lead_id,title,executive_summary,valid_until,proposal_status,total_value,created_by_id
+1,P-2024-001,1,Kitchen Facility Management Solution,Comprehensive facility management for 3 locations,2024-03-01,draft,96000.00,1
+2,P-2024-002,2,Cloud Kitchen Operations Platform,Complete operations platform for urban kitchen,2024-03-15,submitted,78000.00,2
+3,P-2024-003,3,Enterprise Kitchen Management Suite,Full-scale enterprise solution with custom features,2024-02-28,under_review,120000.00,1
+4,P-2024-004,4,Starter Package for Metro Dining,Basic package for new operator,2024-02-20,approved,60000.00,2
+5,P-2024-005,5,Premium Operations Bundle,Premium tier with advanced features,2024-02-10,accepted,144000.00,1
+6,P-2024-006,6,Standard Management Package,Standard package offering,2024-01-31,rejected,90000.00,2

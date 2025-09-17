@@ -1,4 +1,7 @@
-company_name,contact_name,contact_email,contact_phone,lead_source,status,lead_quality_score,estimated_value,assigned_sales_rep_id,qualification_status,qualification_notes
-Fusion Kitchen Group,Alice Williams,alice@fusion.com,415-555-0001,website,new,85,8000.00,1,qualified,High-value prospect with 3 locations
-Urban Eats LLC,Bob Martinez,bob@urbaneats.com,206-555-0002,referral,contacted,75,6500.00,2,qualified,Referred by existing client
-Cloud Kitchen Co,Carol Zhang,carol@cloudkitchen.com,503-555-0003,trade_show,qualified,90,10000.00,1,qualified,Met at Food Tech Expo
+id,company_name,contact_name,contact_email,contact_phone,lead_source,status,priority,lead_quality_score,estimated_value,assigned_sales_rep_id,qualification_status,qualification_notes
+1,Fusion Kitchen Group,Alice Williams,alice@fusion.com,415-555-0001,website,new,high,85,8000.00,1,qualified,High-value prospect with 3 locations
+2,Urban Eats LLC,Bob Martinez,bob@urbaneats.com,206-555-0002,referral,contacted,medium,75,6500.00,2,qualified,Referred by existing client
+3,Cloud Kitchen Co,Carol Zhang,carol@cloudkitchen.com,503-555-0003,trade_show,qualified,critical,90,10000.00,1,qualified,Met at Food Tech Expo
+4,Metro Dining Partners,David Lee,david@metrodining.com,312-555-0004,cold_call,opportunity,medium,65,5000.00,2,in_review,Following up on initial interest
+5,Fresh Start Kitchens,Emma Brown,emma@freshstart.com,617-555-0005,email,converted,low,95,12000.00,1,qualified,Signed contract last week
+6,Peak Restaurant Group,Frank Chen,frank@peakgroup.com,425-555-0006,partner,lost,low,50,7500.00,2,not_qualified,Decided to go with competitor

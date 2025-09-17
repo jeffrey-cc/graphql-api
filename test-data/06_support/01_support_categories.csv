@@ -1,5 +1,16 @@
-category_name,name,description,default_priority,is_active
-technical,Technical Issues,System and technical problems,high,true
-billing,Billing Questions,Invoice and payment issues,medium,true
-account,Account Management,User and access issues,medium,true
-feature,Feature Requests,New feature suggestions,low,true
+id,category_name,parent_category_id,name,description,default_priority,default_sla_hours,is_active
+1,technical,,Technical Issues,System and technical problems,high,4,true
+2,platform_access,1,Platform Access,Login and authentication issues,high,2,true
+3,performance,1,System Performance,Slow loading and timeouts,medium,8,true
+4,data_sync,1,Data Issues,Data synchronization problems,medium,12,true
+5,billing,,Billing Questions,Invoice and payment issues,medium,24,true
+6,invoice,5,Invoice Questions,Questions about charges,medium,24,true
+7,payment,5,Payment Processing,Payment failures and refunds,urgent,8,true
+8,account,,Account Management,User and access issues,medium,24,true
+9,user_mgmt,8,User Management,Adding or updating users,low,48,true
+10,settings,8,Settings Configuration,Account settings help,low,48,true
+11,training,,Training & Onboarding,Training and documentation,low,48,true
+12,platform_training,11,Platform Training,Feature training requests,low,72,true
+13,documentation,11,Documentation Request,Request for guides,low,72,true
+14,features,,Feature Requests,New feature suggestions,low,120,true
+15,bugs,,Bug Reports,Software bug reports,high,24,true
