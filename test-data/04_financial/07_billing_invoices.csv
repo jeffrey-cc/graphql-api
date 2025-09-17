@@ -1,0 +1,4 @@
+invoice_number,operator_company,operator_id,billing_period,issue_date,due_date,amount,commission_rate,revenue_amount,tax_amount,status,payment_date,payment_method,payment_reference,notes,created_by
+INV-2024-001,Northwest Kitchens LLC,1,2024-01,2024-01-01,2024-01-31,5500.00,0.10,5000.00,500.00,paid,2024-01-15,ach,ACH-123456,January services,1
+INV-2024-002,Portland Food Ventures,2,2024-01,2024-01-01,2024-01-31,3850.00,0.10,3500.00,350.00,paid,2024-01-20,wire,WIRE-789012,January services,1
+INV-2024-003,Bay Area Kitchen Group,3,2024-02,2024-02-01,2024-02-29,4620.00,0.10,4200.00,420.00,pending,,"","","February services - pending",1

@@ -94,6 +94,71 @@ Each tier repository contains a `docker-compose.yml` that properly configures:
 All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
+## GraphQL Test Data Management
+
+### Test Data Structure
+The shared GraphQL API includes a comprehensive test data framework that mirrors the database structure from `../shared-database-sql/admin-database-sql/test-data/`:
+
+```
+test-data/
+├── 01_admin/          # Admin schema test data
+│   ├── 01_admin_users.csv
+│   └── 02_admin_permissions.csv
+├── 02_system/         # System schema test data
+├── 03_operators/      # Operators schema test data
+├── 04_financial/      # Financial schema test data
+├── 05_sales/          # Sales schema test data
+├── 06_support/        # Support schema test data
+├── 07_compliance/     # Compliance schema test data
+└── 08_integration/    # Integration schema test data
+```
+
+### GraphQL Test Data Commands
+
+#### Data Management Commands
+```bash
+# Purge all test data via GraphQL mutations
+./commands/purge-test-data-via-graphql.sh <tier> <environment>
+
+# Load test data from CSV files via GraphQL mutations
+./commands/load-test-data-via-graphql.sh <tier> <environment>
+
+# Complete test workflow: purge → load → verify → report
+./commands/test-graphql-data-workflow.sh <tier> <environment>
+```
+
+#### Features
+- **Schema-Aware**: Automatically uses correct GraphQL table names with schema prefixes (e.g., `admin_admin_users`)
+- **Dependency-Aware**: Respects foreign key constraints during purge and load operations
+- **CSV Parsing**: Uses Python for robust CSV parsing with proper data type handling
+- **JSON Generation**: Creates properly formatted GraphQL mutation payloads
+- **Row Count Verification**: Ensures CSV row counts match database row counts
+- **Error Handling**: Comprehensive error reporting and rollback capabilities
+
+#### Data Loading Process
+1. **CSV Parsing**: Converts CSV files to JSON objects with proper data types
+2. **GraphQL Mutations**: Uses parameterized mutations with variables for safety
+3. **Foreign Key Handling**: Loads data in correct dependency order
+4. **Verification**: Compares loaded row counts with CSV row counts
+5. **Reporting**: Provides detailed success/failure reporting
+
+### Usage Examples
+
+```bash
+# Test data workflow for admin development environment
+./commands/test-graphql-data-workflow.sh admin development
+
+# Manual purge and load
+./commands/purge-test-data-via-graphql.sh admin development
+./commands/load-test-data-via-graphql.sh admin development
+
+# Verify data counts match CSV files
+curl -s -X POST -H "Content-Type: application/json" \
+  -H "X-Hasura-Admin-Secret: CCTech2024Admin" \
+  -d '{"query": "{ admin_admin_users_aggregate { aggregate { count } } }"}' \
+  http://localhost:8101/v1/graphql
+```
+
 ### Core Deployment & Management Commands (commands/)
 
 #### Primary Operations

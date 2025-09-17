@@ -1,0 +1,4 @@
+company_name,legal_name,business_type,street_address,city,state_province,postal_code,country,phone,email,website,contact_email,contact_phone,platform_subdomain,status,signed_up_at,logo_image_url
+Northwest Kitchens LLC,Northwest Kitchens LLC,LLC,"1234 Pine St, Suite 100",Seattle,WA,98101,USA,206-555-0001,info@northwest.com,https://northwestkitchens.com,john@northwest.com,206-555-0001,northwest,active,2024-01-01,https://cdn.example.com/logos/northwest.png
+Portland Food Ventures,Portland Food Ventures Inc,Corporation,"5678 Oak Ave",Portland,OR,97201,USA,503-555-0002,info@portland.com,https://portlandfood.com,sarah@portland.com,503-555-0002,portland,active,2024-01-15,
+Bay Area Kitchen Group,Bay Area Kitchen Group LLC,LLC,"9012 Market St",San Francisco,CA,94102,USA,415-555-0003,info@bayarea.com,https://bayareakitchen.com,mike@bayarea.com,415-555-0003,bayarea,active,2024-02-01,

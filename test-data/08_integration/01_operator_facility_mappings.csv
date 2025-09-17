@@ -1,0 +1,6 @@
+admin_company_id,operator_facility_id,facility_name,is_primary_facility,mapping_status,last_synced_at,sync_status,verified_by_id,verified_at
+1,3001,Northwest Kitchen - Main,true,active,2024-09-16 12:16:49,synced,1,2024-08-17
+1,3002,Northwest Kitchen - Eastside,false,active,2024-09-16 11:16:49,synced,1,2024-08-17
+2,3003,Portland Food Hub,true,active,2024-09-16 12:46:49,synced,2,2024-09-02
+3,3004,Bay Area Kitchen Central,true,active,2024-09-16 10:16:49,error,,
+3,3005,Bay Area Kitchen South,false,pending_verification,,,,

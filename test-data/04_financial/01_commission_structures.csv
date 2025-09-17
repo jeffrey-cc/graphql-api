@@ -1,0 +1,4 @@
+company_id,structure_name,structure_type,base_commission_rate,tier_1_threshold,tier_1_rate,tier_2_threshold,tier_2_rate,effective_start_date,is_active,created_by_id
+1,Standard,tiered,0.1000,10000.00,0.0900,25000.00,0.0800,2024-01-01,true,1
+2,Standard,tiered,0.1000,10000.00,0.0900,25000.00,0.0800,2024-01-01,true,1
+3,Enterprise,tiered,0.0600,50000.00,0.0500,100000.00,0.0400,2024-02-01,true,1

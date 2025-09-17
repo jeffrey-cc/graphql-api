@@ -1,0 +1,6 @@
+company_id,first_name,last_name,title,email,phone,role_type,is_primary_contact,is_billing_contact,is_technical_contact
+1,John,Smith,Owner,john@northwest.com,206-555-0001,owner,true,true,false
+1,Lisa,Davis,Operations Manager,lisa@northwest.com,206-555-0011,manager,false,false,true
+2,Sarah,Johnson,CEO,sarah@portland.com,503-555-0002,owner,true,true,false
+2,David,Wilson,CFO,david@portland.com,503-555-0012,admin,false,true,false
+3,Mike,Chen,Managing Partner,mike@bayarea.com,415-555-0003,owner,true,true,true

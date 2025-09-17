@@ -1,0 +1,3 @@
+alert_type,severity,company_id,title,description,due_date,status,assigned_to_id
+license_expiry,high,1,Business License Expiring,Business license expires in 30 days,2024-10-16,open,3
+insurance_renewal,medium,2,Insurance Renewal Due,General liability insurance renewal,2024-09-30,in_progress,3

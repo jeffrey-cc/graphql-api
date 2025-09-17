@@ -1,0 +1,11 @@
+permission_name,description,action,resource
+users.create,Create new admin users,create,users
+users.read,View admin user details,read,users
+users.update,Update admin user information,update,users
+users.delete,Delete admin users,delete,users
+operators.create,Create new operators,create,operators
+operators.read,View operator details,read,operators
+operators.update,Update operator information,update,operators
+analytics.read,View system analytics,read,analytics
+billing.manage,Manage billing and invoices,manage,billing
+system.manage,Full system administration access,manage,system

@@ -1,0 +1,5 @@
+category_name,name,description,default_priority,is_active
+technical,Technical Issues,System and technical problems,high,true
+billing,Billing Questions,Invoice and payment issues,medium,true
+account,Account Management,User and access issues,medium,true
+feature,Feature Requests,New feature suggestions,low,true

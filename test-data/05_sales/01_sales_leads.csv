@@ -1,0 +1,4 @@
+company_name,contact_name,contact_email,contact_phone,lead_source,status,lead_quality_score,estimated_value,assigned_sales_rep_id,qualification_status,qualification_notes
+Fusion Kitchen Group,Alice Williams,alice@fusion.com,415-555-0001,website,new,85,8000.00,1,qualified,High-value prospect with 3 locations
+Urban Eats LLC,Bob Martinez,bob@urbaneats.com,206-555-0002,referral,contacted,75,6500.00,2,qualified,Referred by existing client
+Cloud Kitchen Co,Carol Zhang,carol@cloudkitchen.com,503-555-0003,trade_show,qualified,90,10000.00,1,qualified,Met at Food Tech Expo
