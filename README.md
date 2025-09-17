@@ -10,30 +10,56 @@ This repository provides a centralized set of parameterized commands that work a
 
 The shared system uses tier-based parameterization to manage three separate Hasura GraphQL APIs:
 
-| Tier     | Port | Container Name          | Database Connection     | Admin Secret        |
-|----------|------|-------------------------|-------------------------|---------------------|
-| admin    | 8100 | admin-graphql-server    | localhost:5433/admin    | CCTech2024Admin     |
-| operator | 8101 | operator-graphql-server | localhost:5434/operator | CCTech2024Operator  |
-| member   | 8102 | member-graphql-server   | localhost:5435/member   | CCTech2024Member    |
+| Tier     | GraphQL Port | Container Name          | PostgreSQL Port | Admin Secret        |
+|----------|--------------|-------------------------|-----------------|---------------------|
+| admin    | 8101         | admin-graphql-server    | 7101           | CCTech2024Admin     |
+| operator | 8102         | operator-graphql-server | 7102           | CCTech2024Operator  |
+| member   | 8103         | member-graphql-server   | 7103           | CCTech2024Member    |
 
 ## Directory Structure
 
 ```
 shared-graphql-api/
-├── commands/                   # Unified GraphQL commands (8 commands)
-│   ├── _shared_functions.sh    # Core library with tier configuration
-│   ├── deploy-graphql.sh       # Deploy GraphQL API for any tier
-│   ├── fast-refresh.sh         # Fast metadata refresh (1-3 seconds)
-│   ├── rebuild-docker.sh       # Complete Docker rebuild (30-45 seconds)
-│   ├── track-all-tables.sh     # Track database tables for GraphQL
-│   ├── track-relationships.sh  # Track foreign key relationships
-│   └── compare-environments.sh # Compare dev vs production
-├── testing/                    # Unified testing framework (3 commands)
-│   ├── test-graphql.sh         # Complete 4-step test workflow
-│   ├── purge-test-data.sh      # Remove data, preserve schema
-│   └── load-test-data.sh       # Load tier-specific test data
-├── scripts/                    # Utility scripts
-└── README.md                   # This file
+├── commands/                           # Unified GraphQL commands (31 commands)
+│   ├── _shared_functions.sh           # Core library with tier configuration
+│   ├── deploy-graphql.sh              # Deploy GraphQL API for any tier
+│   ├── fast-refresh.sh                # Fast metadata refresh (1-3 seconds)
+│   ├── rebuild-docker.sh              # Complete Docker rebuild (30-45 seconds)
+│   ├── full-rebuild.sh                # Smart rebuild (Docker in dev, refresh in prod)
+│   ├── docker-start.sh                # Start GraphQL containers
+│   ├── docker-stop.sh                 # Stop GraphQL containers
+│   ├── docker-status.sh               # Check container status
+│   ├── restart-graphql.sh             # Restart with health check
+│   ├── track-all-tables.sh            # Track database tables for GraphQL
+│   ├── track-relationships.sh         # Track foreign key relationships
+│   ├── verify-complete-setup.sh       # Full setup validation
+│   ├── verify-tables-tracked.sh       # Verify table tracking
+│   ├── test-health.sh                 # Health endpoint testing
+│   ├── status-all.sh                  # System-wide status check
+│   ├── compare-environments.sh        # Basic dev vs prod comparison
+│   ├── compare-schema-deep.sh         # Deep schema introspection
+│   ├── compare-tables.sh              # Compare tracked tables
+│   ├── count-records.sh               # Count records in all tables
+│   ├── setup-production.sh            # Configure production
+│   ├── test-all-comprehensive.sh      # Run all tier tests with report
+│   ├── test-all-tiers-graphql.sh      # Test all tiers in sequence
+│   ├── test-graphql-data-workflow.sh  # Complete test workflow
+│   ├── purge-admin-test-data-via-graphql.sh      # Purge admin data
+│   ├── purge-operator-test-data-via-graphql.sh   # Purge operator data
+│   ├── purge-member-test-data-via-graphql.sh     # Purge member data
+│   ├── purge-test-data-via-graphql.sh            # Generic purge
+│   ├── load-admin-test-data-via-graphql.sh       # Load admin data
+│   ├── load-operator-test-data-via-graphql.sh    # Load operator data
+│   ├── load-member-test-data-via-graphql.sh      # Load member data
+│   └── load-test-data-via-graphql.sh             # Generic load
+├── testing/                            # Unified testing framework (4 commands)
+│   ├── test-graphql.sh                # Complete 4-step test workflow
+│   ├── test-connection.sh             # Basic connectivity testing
+│   ├── purge-test-data.sh             # Remove data, preserve schema
+│   └── load-test-data.sh              # Load tier-specific test data
+├── test-data/                          # Test data for all schemas
+├── version/                            # Version management
+└── README.md                           # This file
 ```
 
 ## Usage
@@ -117,13 +143,13 @@ The `_shared_functions.sh` library provides the `configure_tier()` function that
 
 ```bash
 configure_tier "admin"
-# Sets: GRAPHQL_TIER_PORT=8100, GRAPHQL_TIER_CONTAINER=admin-graphql-server, etc.
+# Sets: GRAPHQL_TIER_PORT=8101, GRAPHQL_TIER_CONTAINER=admin-graphql-server, etc.
 
 configure_tier "operator"  
-# Sets: GRAPHQL_TIER_PORT=8101, GRAPHQL_TIER_CONTAINER=operator-graphql-server, etc.
+# Sets: GRAPHQL_TIER_PORT=8102, GRAPHQL_TIER_CONTAINER=operator-graphql-server, etc.
 
 configure_tier "member"
-# Sets: GRAPHQL_TIER_PORT=8102, GRAPHQL_TIER_CONTAINER=member-graphql-server, etc.
+# Sets: GRAPHQL_TIER_PORT=8103, GRAPHQL_TIER_CONTAINER=member-graphql-server, etc.
 ```
 
 ### Environment Configuration
@@ -149,7 +175,7 @@ Commands automatically discover resources from the tier-specific repositories:
 ## Features
 
 ### Unified Command Interface
-- **8 total commands** covering all GraphQL operations
+- **35 total commands** (31 in commands/ + 4 in testing/) covering all GraphQL operations
 - Consistent parameter handling and validation across all tiers
 - Shared error handling and comprehensive logging
 - Tier-based parameterization (admin/operator/member)
@@ -188,11 +214,13 @@ Commands automatically discover resources from the tier-specific repositories:
 ## Migration Status
 
 ### Completed Migrations ✅
-- **member-graqhql-api**: Initial shared system implementation with wrapper commands
+- **All three tier repositories**: Fully migrated to shared system architecture
+- **admin-graqhql-api**: Complete migration with wrapper commands
+- **operator-graqhql-api**: Complete migration with wrapper commands  
+- **member-graqhql-api**: Complete migration with wrapper commands
 
-### Pending Migrations
-- **admin-graqhql-api**: Not yet migrated (still using individual commands)
-- **operator-graqhql-api**: Not yet migrated (still using individual commands)
+### System Status
+All GraphQL API tiers now use the unified shared command system with 95%+ code reduction achieved.
 
 ### Migration Process
 To migrate a repository from individual commands to the shared system:
@@ -221,7 +249,7 @@ exec "$SHARED_GRAPHQL_API_PATH/commands/deploy-graphql.sh" member "$@"
 ### Operational Excellence
 5. **Consistent Behavior**: Identical command logic enforced across all tiers
 6. **Production Safety**: Comprehensive safeguards and validation for all operations
-7. **Advanced Testing**: 8 commands covering every aspect of GraphQL management
+7. **Advanced Testing**: 35 commands covering every aspect of GraphQL management
 8. **Dynamic Discovery**: Commands automatically discover and handle database objects
 
 ### System Integration

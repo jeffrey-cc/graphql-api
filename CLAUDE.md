@@ -94,11 +94,12 @@ Each tier repository contains a `docker-compose.yml` that properly configures:
 All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
-### 📚 Complete Command Index
+### 📚 Complete Command Index (31 Commands + 4 Testing)
 
 #### Core Operations (Most Used)
 - `fast-refresh.sh` - Reload metadata only (1-3 seconds) ⚡
 - `rebuild-docker.sh` - Complete container rebuild (dev only, 30-45s) 🔨
+- `full-rebuild.sh` - Smart rebuild (Docker in dev, refresh in prod)
 - `deploy-graphql.sh` - Full deployment with metadata
 - `test-health.sh` - Check GraphQL health status
 
@@ -108,11 +109,18 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 - `compare-tables.sh` - Compare tracked tables
 - `count-records.sh` - Count all records per table
 
-#### Test Data Management
+#### Test Data Management (Tier-Specific)
 - `test-all-comprehensive.sh` - Run all tier tests with report 📊
+- `test-all-tiers-graphql.sh` - Test all tiers in sequence
 - `test-graphql-data-workflow.sh` - Complete test workflow
-- `purge-{tier}-test-data-via-graphql.sh` - Purge tier data
-- `load-{tier}-test-data-via-graphql.sh` - Load tier data
+- `purge-admin-test-data-via-graphql.sh` - Purge admin tier data
+- `purge-operator-test-data-via-graphql.sh` - Purge operator tier data
+- `purge-member-test-data-via-graphql.sh` - Purge member tier data
+- `purge-test-data-via-graphql.sh` - Generic purge command
+- `load-admin-test-data-via-graphql.sh` - Load admin tier data
+- `load-operator-test-data-via-graphql.sh` - Load operator tier data
+- `load-member-test-data-via-graphql.sh` - Load member tier data
+- `load-test-data-via-graphql.sh` - Generic load command
 
 #### Docker Management
 - `docker-start.sh` - Start containers
@@ -126,9 +134,9 @@ Where tier = `admin`, `operator`, or `member` and environment = `development` or
 - `verify-tables-tracked.sh` - Verify tracking
 - `verify-complete-setup.sh` - Full setup verification
 
-#### System Status
+#### System Status & Production
 - `status-all.sh` - System-wide status check
-- `setup-production.sh` - Configure production
+- `setup-production.sh` - Configure production environment
 
 ## GraphQL Test Data Management
 
@@ -292,6 +300,15 @@ curl -s -X POST -H "Content-Type: application/json" \
 ./commands/full-rebuild.sh <tier> <environment>
 ```
 
+#### New Testing Commands (Added)
+```bash
+# Test all tiers in sequence
+./commands/test-all-tiers-graphql.sh
+
+# Comprehensive testing with detailed reporting
+./commands/test-all-comprehensive.sh
+```
+
 ### Testing Commands (testing/)
 
 #### Complete Test Workflow
@@ -317,28 +334,46 @@ curl -s -X POST -H "Content-Type: application/json" \
 ### Directory Structure
 ```
 shared-graphql-api/
-├── commands/                     # Main GraphQL operations (15 commands)
-│   ├── _shared_functions.sh     # Core library with tier configuration
-│   ├── deploy-graphql.sh        # Full deployment with metadata
-│   ├── fast-refresh.sh          # Quick metadata refresh
-│   ├── rebuild-docker.sh        # Complete Docker rebuild
-│   ├── docker-start.sh          # Start containers
-│   ├── docker-stop.sh           # Stop containers
-│   ├── docker-status.sh         # Check container status
-│   ├── restart-graphql.sh       # Restart with health check
-│   ├── track-all-tables.sh      # Auto-track database tables
-│   ├── track-relationships.sh   # Track foreign keys
-│   ├── verify-complete-setup.sh # Full setup validation
-│   ├── verify-tables-tracked.sh # Verify table tracking
-│   ├── test-health.sh           # Health endpoint testing
-│   ├── status-all.sh            # System-wide status check
-│   └── compare-environments.sh  # Dev vs prod comparison
-├── testing/                      # Testing framework (4 commands)
-│   ├── test-graphql.sh          # Complete test workflow
-│   ├── test-connection.sh       # Basic connectivity test
-│   ├── load-test-data.sh        # Load test fixtures
-│   └── purge-test-data.sh       # Clean test data
-└── Tier repositories (../)      # Individual tier repos
+├── commands/                           # Main GraphQL operations (31 commands)
+│   ├── _shared_functions.sh           # Core library with tier configuration
+│   ├── deploy-graphql.sh              # Full deployment with metadata
+│   ├── fast-refresh.sh                # Quick metadata refresh
+│   ├── rebuild-docker.sh              # Complete Docker rebuild
+│   ├── full-rebuild.sh                # Smart rebuild (Docker in dev, refresh in prod)
+│   ├── docker-start.sh                # Start containers
+│   ├── docker-stop.sh                 # Stop containers
+│   ├── docker-status.sh               # Check container status
+│   ├── restart-graphql.sh             # Restart with health check
+│   ├── track-all-tables.sh            # Auto-track database tables
+│   ├── track-relationships.sh         # Track foreign keys
+│   ├── verify-complete-setup.sh       # Full setup validation
+│   ├── verify-tables-tracked.sh       # Verify table tracking
+│   ├── test-health.sh                 # Health endpoint testing
+│   ├── status-all.sh                  # System-wide status check
+│   ├── compare-environments.sh        # Basic dev vs prod comparison
+│   ├── compare-schema-deep.sh         # Deep schema introspection comparison
+│   ├── compare-tables.sh              # Compare tracked tables
+│   ├── count-records.sh               # Count records in all tables
+│   ├── setup-production.sh            # Configure production environment
+│   ├── test-all-comprehensive.sh      # Run all tier tests with report
+│   ├── test-all-tiers-graphql.sh      # Test all tiers in sequence
+│   ├── test-graphql-data-workflow.sh  # Complete test workflow
+│   ├── purge-admin-test-data-via-graphql.sh    # Purge admin tier data
+│   ├── purge-operator-test-data-via-graphql.sh # Purge operator tier data
+│   ├── purge-member-test-data-via-graphql.sh   # Purge member tier data
+│   ├── purge-test-data-via-graphql.sh          # Generic purge command
+│   ├── load-admin-test-data-via-graphql.sh     # Load admin tier data
+│   ├── load-operator-test-data-via-graphql.sh  # Load operator tier data
+│   ├── load-member-test-data-via-graphql.sh    # Load member tier data
+│   └── load-test-data-via-graphql.sh           # Generic load command
+├── testing/                            # Testing framework (4 commands)
+│   ├── test-graphql.sh                # Complete test workflow
+│   ├── test-connection.sh             # Basic connectivity test
+│   ├── load-test-data.sh              # Load test fixtures
+│   └── purge-test-data.sh             # Clean test data
+├── test-data/                          # Test data for all schemas
+├── version/                            # Version management
+└── Tier repositories (../)            # Individual tier repos
     ├── admin-graqhql-api/
     ├── operator-graqhql-api/
     └── member-graqhql-api/
