@@ -497,6 +497,35 @@ These commands exist in individual tier repositories but could be candidates for
   - Portal testing depends on GraphQL API availability
   - Seed data must be loaded after GraphQL deployment
 
+## ⚠️ CRITICAL: RELATIONSHIPS ARE ESSENTIAL FOR GRAPHQL
+
+### Why Relationships Matter
+**GraphQL without relationships is useless!** The entire point of GraphQL is to enable nested queries across related tables. Without tracked relationships:
+- No nested queries possible
+- No efficient data fetching
+- Basically just REST with extra steps
+- **Complete waste of GraphQL's power**
+
+### Automatic Relationship Tracking
+All rebuild/refresh/deploy commands now **AUTOMATICALLY**:
+1. Track all database tables
+2. **Track all foreign key relationships** (CRITICAL!)
+3. Create object relationships (many-to-one)
+4. Create array relationships (one-to-many)
+5. Verify relationships are working
+
+### Manual Relationship Tracking
+If relationships are missing after rebuild:
+```bash
+# Force track all relationships
+./commands/track-relationships.sh <tier> <environment>
+
+# Or manually via Hasura API
+curl -X POST -H "X-Hasura-Admin-Secret: <secret>" \
+  -d '{"type": "pg_create_object_relationship", ...}' \
+  http://localhost:<port>/v1/metadata
+```
+
 ## ⚠️ CRITICAL COMMAND DISTINCTIONS - NO AMBIGUITY
 
 ### REBUILD vs REFRESH - Precise Definitions

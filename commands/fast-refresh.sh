@@ -123,6 +123,18 @@ if ! reload_metadata "$TIER" "$ENVIRONMENT"; then
     exec "$SCRIPT_DIR/rebuild-docker.sh" "$TIER" "$ENVIRONMENT"
 fi
 
+# Track all tables
+log_progress "Tracking database tables..."
+if ! track_all_tables "$TIER" "$ENVIRONMENT"; then
+    log_warning "Some tables failed to track"
+fi
+
+# Track relationships (CRITICAL for GraphQL nested queries)
+log_progress "Tracking foreign key relationships..."
+if ! track_relationships "$TIER" "$ENVIRONMENT"; then
+    log_warning "Some relationships failed to track - GraphQL nested queries may not work!"
+fi
+
 # Verify GraphQL schema is working
 log_progress "Verifying GraphQL schema..."
 if ! test_graphql_connection "$TIER" "$ENVIRONMENT"; then
