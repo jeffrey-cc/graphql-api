@@ -1,5 +1,0 @@
-company_id,user_id,operator_facility_id,member_facility_access_id,requested_start_time,requested_end_time,duration_hours,status,purpose,created_at,updated_at
-1,1,1,1,2024-09-17 09:00:00+00,2024-09-17 15:00:00+00,6.00,approved,Pizza prep and baking session,2024-09-16 10:00:00+00,2024-09-16 11:00:00+00
-2,3,1,2,2024-09-17 16:00:00+00,2024-09-17 20:00:00+00,4.00,approved,Burger batch cooking,2024-09-16 10:30:00+00,2024-09-16 11:30:00+00
-3,5,2,3,2024-09-18 08:00:00+00,2024-09-18 14:00:00+00,6.00,pending,Fusion meal prep,2024-09-16 11:00:00+00,2024-09-16 11:00:00+00
-5,8,3,4,2024-09-18 10:00:00+00,2024-09-18 12:00:00+00,2.00,approved,Taco ingredients prep,2024-09-16 11:30:00+00,2024-09-16 12:30:00+00

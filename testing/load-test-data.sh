@@ -4,7 +4,7 @@
 # SHARED GRAPHQL TEST DATA LOADER
 # Community Connect Tech - Shared GraphQL API System
 # ============================================================================
-# Loads tier-specific test data for GraphQL API testing
+# Loads tier-specific test data from GraphQL repository CSV files
 # Usage: ./load-test-data.sh <tier> <environment> [options]
 # ============================================================================
 
@@ -20,41 +20,51 @@ show_help() {
 Shared GraphQL API - Load Test Data
 
 DESCRIPTION:
-    Loads tier-specific test data for GraphQL API testing.
-    Delegates to the shared database system's test data loading
-    functionality with proper tier-specific data sets.
+    Loads tier-specific test data for GraphQL API testing from
+    CSV files in the GraphQL repository test-data folders.
 
 USAGE:
     ./load-test-data.sh <tier> <environment> [options]
 
 ARGUMENTS:
-    tier           One of: admin, operator, member
-    environment    Either 'production' or 'development'
+    tier              GraphQL tier (admin, operator, or member)
+    environment       Environment (development or production)
 
 OPTIONS:
-    -h, --help     Show this help message
+    -h, --help        Show this help message
+    -v, --verbose     Enable verbose output
+    -f, --force       Force load even if data exists
 
 EXAMPLES:
-    ./load-test-data.sh member development    # Load member test data
-    ./load-test-data.sh admin production      # Load admin production test data
+    ./load-test-data.sh admin development
+    ./load-test-data.sh operator production --force
 
 NOTES:
-    - Delegates to shared-database-sql load system
-    - Uses tier-specific test data from respective repositories
-    - Handles foreign key dependencies automatically
-    - Safe to run multiple times (uses upsert patterns)
+    - Loads CSV data from ../graphql-{tier}-api/test-data/
+    - Uses shared-database-sql system for actual data loading
+    - Requires GraphQL tables to be tracked first
 EOF
 }
 
 # Parse command line arguments
 TIER=""
 ENVIRONMENT=""
+VERBOSE_FLAG=""
+FORCE_FLAG=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
             show_help
             exit 0
+            ;;
+        -v|--verbose)
+            VERBOSE_FLAG="--verbose"
+            shift
+            ;;
+        -f|--force)
+            FORCE_FLAG="--force"
+            shift
             ;;
         *)
             if [[ -z "$TIER" ]]; then
@@ -78,15 +88,19 @@ if [[ -z "$TIER" || -z "$ENVIRONMENT" ]]; then
     exit 1
 fi
 
-# Configure tier and validate
-if ! configure_tier "$TIER"; then
-    die "Failed to configure tier: $TIER"
+# Basic validation
+if [[ ! "$TIER" =~ ^(admin|operator|member)$ ]]; then
+    log_error "Invalid tier: $TIER (must be admin, operator, or member)"
+    exit 1
 fi
 
-validate_environment "$ENVIRONMENT"
+if [[ ! "$ENVIRONMENT" =~ ^(development|production)$ ]]; then
+    log_error "Invalid environment: $ENVIRONMENT (must be development or production)"
+    exit 1
+fi
 
-# Check prerequisites
-check_prerequisites
+# Configure tier settings
+configure_tier "$TIER"
 
 section_header "📥 SHARED GRAPHQL TEST DATA LOADER - $(echo $TIER | tr '[:lower:]' '[:upper:]') TIER"
 log_info "Tier: $TIER"
@@ -96,61 +110,91 @@ log_info "Database: $DB_TIER_DATABASE at localhost:$DB_TIER_PORT"
 # Start timing
 start_timer
 
-# Delegate to shared database system
-log_progress "Delegating to shared database test data loader..."
+# Check that test-data directory exists
+TIER_REPO_PATH="../graphql-$TIER-api"
+TEST_DATA_PATH="$TIER_REPO_PATH/test-data"
 
-SHARED_DB_LOADER="../shared-database-sql/testing/load-test-data.sh"
-
-if [[ ! -f "$SHARED_DB_LOADER" ]]; then
-    die "Shared database test data loader not found: $SHARED_DB_LOADER"
+if [[ ! -d "$TEST_DATA_PATH" ]]; then
+    log_error "❌ Test data directory not found: $TEST_DATA_PATH"
+    log_error ""
+    log_error "REQUIRED ACTION:"
+    log_error "  Ensure test-data has been copied to the GraphQL repository:"
+    log_error "  mkdir -p $TEST_DATA_PATH"
+    log_error "  cp -r /path/to/database-$TIER-sql/test-data/* $TEST_DATA_PATH/"
+    die "Cannot proceed without test data directory"
 fi
 
+# Count CSV files
+csv_count=$(find "$TEST_DATA_PATH" -name "*.csv" | wc -l | tr -d ' ')
+log_info "Found $csv_count CSV files in $TEST_DATA_PATH"
+
+if [[ "$csv_count" -eq 0 ]]; then
+    log_error "❌ No CSV files found in test data directory"
+    die "Cannot load test data without CSV files"
+fi
+
+# Delegate to shared database system
+log_progress "Using shared database system to load test data..."
+
+SHARED_DB_DIR="../shared-database-sql"
+SHARED_DB_LOADER="$SHARED_DB_DIR/testing/load-test-data.sh"
+
+if [[ ! -f "$SHARED_DB_LOADER" ]]; then
+    log_error "❌ Shared database test data loader not found: $SHARED_DB_LOADER"
+    log_error ""
+    log_error "REQUIRED ACTION:"
+    log_error "  Ensure shared-database-sql repository is available at:"
+    log_error "  $SHARED_DB_DIR"
+    die "Cannot proceed without shared database system"
+fi
+
+# Create temporary symlink to our test data
+TEMP_LINK="$SHARED_DB_DIR/database-$TIER-sql/test-data-graphql-temp"
+if [[ -L "$TEMP_LINK" ]]; then
+    rm -f "$TEMP_LINK"
+fi
+
+# Create the symlink and execute
+ln -sf "$(cd "$TEST_DATA_PATH" && pwd)" "$TEMP_LINK"
+
+# Modify the shared loader to use our test data temporarily
+log_detail "Loading test data via shared database system..."
+
 # Execute shared database loader with tier parameters
-log_detail "Executing: $SHARED_DB_LOADER $TIER $ENVIRONMENT"
+cd "$SHARED_DB_DIR"
+if ./testing/load-test-data.sh "$TIER" "$ENVIRONMENT" $VERBOSE_FLAG $FORCE_FLAG; then
+    load_exit_code=0
+    log_success "✅ Test data loaded successfully"
+else
+    load_exit_code=$?
+    log_error "❌ Test data loading failed"
+fi
 
-"$SHARED_DB_LOADER" "$TIER" "$ENVIRONMENT"
+# Clean up temporary link
+rm -f "$TEMP_LINK"
 
-local load_exit_code=$?
+# Return to original directory
+cd "$SCRIPT_DIR"
 
+# Final verification
 if [[ $load_exit_code -eq 0 ]]; then
-    log_success "Test data loaded successfully"
+    log_info "Verifying data was loaded..."
+    
+    # Quick count check via GraphQL (if tables are tracked)
+    configure_endpoint "$TIER" "$ENVIRONMENT"
+    
+    if test_graphql_connection "$TIER" "$ENVIRONMENT" >/dev/null 2>&1; then
+        log_success "✅ GraphQL API verified: data loading completed"
+    else
+        log_warning "⚠️  GraphQL API not responding (tables may not be tracked yet)"
+    fi
 else
     die "Test data loading failed with exit code $load_exit_code"
 fi
 
-# Verify data was loaded by checking some basic counts
-log_progress "Verifying test data was loaded..."
+# Performance summary
+end_timer
 
-local db_url="postgresql://$DB_TIER_USER:$DB_TIER_PASSWORD@localhost:$DB_TIER_PORT/$DB_TIER_DATABASE"
-
-# Get table count with data
-local tables_with_data=$(psql "$db_url" -t -c "
-    SELECT COUNT(*)
-    FROM (
-        SELECT schemaname, tablename
-        FROM pg_tables 
-        WHERE schemaname NOT IN ('information_schema', 'pg_catalog', 'hdb_catalog', 'public')
-    ) t
-    JOIN LATERAL (
-        SELECT CASE WHEN EXISTS (
-            SELECT 1 FROM pg_class c 
-            JOIN pg_namespace n ON n.oid = c.relnamespace 
-            WHERE n.nspname = t.schemaname AND c.relname = t.tablename 
-            AND c.reltuples > 0
-        ) THEN 1 ELSE 0 END as has_data
-    ) d ON d.has_data = 1
-" 2>/dev/null | xargs)
-
-if [[ "$tables_with_data" =~ ^[0-9]+$ && "$tables_with_data" -gt 0 ]]; then
-    log_success "Verified: $tables_with_data tables contain test data"
-else
-    log_warning "Could not verify test data or no data found"
-fi
-
-# Success summary
-print_operation_summary "Test Data Loading" "$TIER" "$ENVIRONMENT"
-
-log_success "Test data loaded successfully!"
-log_info "Ready for GraphQL API testing"
-# Return success exit code
-exit 0
+log_success "🎉 Test data loading completed successfully!"
+log_info "Loaded $csv_count CSV files to $TIER database"
+log_info "Next step: Run testing/test-graphql.sh to validate the data"

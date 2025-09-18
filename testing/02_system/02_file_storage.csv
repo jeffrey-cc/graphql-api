@@ -1,4 +1,0 @@
-file_name,file_type,file_size,file_hash,storage_type,entity_type,entity_id,entity_table,description,tags,metadata,uploaded_by
-admin_logo.png,image/png,45678,abc123def456,database,system,1,admin_system_info,Admin portal logo,"{logo,branding}","{""width"": 200, ""height"": 50}",1
-terms_of_service.pdf,application/pdf,234567,def456ghi789,filesystem,system,2,admin_system_info,Terms of service document,"{legal,document}","{""pages"": 12, ""version"": ""2024.1""}",1
-user_manual.pdf,application/pdf,567890,ghi789jkl012,filesystem,system,3,admin_system_info,User manual for operators,"{documentation,manual}","{""pages"": 45, ""version"": ""3.2""}",2

@@ -1,9 +1,0 @@
-id,title,slug,summary,content,category_id,visibility,status,difficulty_level,view_count,helpful_count,not_helpful_count
-1,How to Reset Your Password,password-reset,Step-by-step guide to reset your account password,Complete guide for password reset process,2,public,published,beginner,1250,145,12
-2,Understanding Billing Cycles,billing-cycles,Learn about monthly and annual billing options,Detailed explanation of billing cycle options,5,operators,published,intermediate,890,78,5
-3,API Integration Guide,api-integration,Technical guide for API integration,Complete API integration documentation,1,internal,published,advanced,345,56,3
-4,Troubleshooting Login Issues,login-troubleshooting,Common login problems and solutions,Solutions for various login problems,2,public,published,beginner,2100,289,23
-5,Platform Feature Overview,feature-overview,Overview of all platform features,Comprehensive platform feature guide,11,public,published,beginner,3400,412,18
-6,Advanced Reporting Features,advanced-reporting,Using advanced reporting capabilities,Guide to advanced reporting tools,10,operators,review,expert,156,23,2
-7,Data Export Options,data-export,How to export your data,Various data export methods explained,4,operators,published,intermediate,670,89,7
-8,SLA Policy Details,sla-policies,Understanding SLA commitments,Detailed SLA policy information,8,internal,draft,intermediate,0,0,0

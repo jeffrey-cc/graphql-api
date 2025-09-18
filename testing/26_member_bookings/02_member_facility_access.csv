@@ -1,5 +1,0 @@
-company_id,operator_facility_id,access_type,access_level,status,granted_date,max_bookings_per_day,max_bookings_per_week,max_consecutive_hours,hourly_rate,requested_by_user_id,created_at,updated_at
-1,1,full,premium,active,2024-09-01,3,15,8,25.00,1,2024-09-01 08:00:00+00,2024-09-01 08:00:00+00
-2,1,limited,standard,active,2024-09-01,2,10,6,30.00,3,2024-09-01 08:05:00+00,2024-09-01 08:05:00+00
-3,2,full,premium,active,2024-09-01,3,15,8,28.00,5,2024-09-01 08:10:00+00,2024-09-01 08:10:00+00
-5,3,limited,standard,active,2024-09-01,2,10,6,32.00,8,2024-09-01 08:15:00+00,2024-09-01 08:15:00+00

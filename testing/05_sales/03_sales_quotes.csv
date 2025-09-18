@@ -1,7 +1,0 @@
-id,quote_number,lead_id,total_amount,valid_until,quote_status,created_by_id,notes
-1,Q-2024-001,1,8000.00,2024-02-15,draft,1,Initial quote preparation
-2,Q-2024-002,2,6500.00,2024-02-20,sent,2,Sent to customer for review
-3,Q-2024-003,3,10000.00,2024-02-10,viewed,1,Customer has viewed the quote
-4,Q-2024-004,4,5000.00,2024-02-25,accepted,2,Quote accepted by customer
-5,Q-2024-005,5,12000.00,2024-01-31,rejected,1,Customer rejected due to budget
-6,Q-2024-006,6,7500.00,2024-01-15,expired,2,Quote validity period expired

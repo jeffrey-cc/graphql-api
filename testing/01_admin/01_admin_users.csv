@@ -1,9 +1,0 @@
-id,username,email,password_hash,first_name,last_name,phone,profile_image_url,department,job_title,hire_date,manager_id,salary,employment_status,role,is_active,last_login_at
-1,admin,admin@cct.com,$2b$10$hashedpassword1,System,Administrator,555-0101,,Executive,CEO,2024-01-01,,150000.00,active,super_admin,true,2024-09-15 10:00:00
-2,jsmith,j.smith@cct.com,$2b$10$hashedpassword2,John,Smith,555-0102,,Sales,Sales Director,2024-01-15,1,85000.00,active,manager,true,2024-09-15 09:30:00
-3,mwilson,m.wilson@cct.com,$2b$10$hashedpassword3,Mary,Wilson,555-0103,,Support,Support Manager,2024-02-01,1,75000.00,active,manager,true,2024-09-15 08:45:00
-4,dbrown,d.brown@cct.com,$2b$10$hashedpassword4,David,Brown,555-0104,,Finance,Finance Director,2024-01-20,1,90000.00,active,finance_user,true,2024-09-15 09:15:00
-5,sjohnson,s.johnson@cct.com,$2b$10$hashedpassword5,Sarah,Johnson,555-0105,,Sales,Sales Representative,2024-03-01,2,55000.00,active,sales_rep,true,2024-09-14 16:30:00
-6,rgarcia,r.garcia@cct.com,$2b$10$hashedpassword6,Robert,Garcia,555-0106,,Support,Support Agent,2024-03-15,3,45000.00,active,support_agent,true,2024-09-14 17:00:00
-7,lmiller,l.miller@cct.com,$2b$10$hashedpassword7,Lisa,Miller,555-0107,,Sales,Sales Representative,2024-04-01,2,55000.00,active,sales_rep,true,2024-09-14 15:45:00
-8,kdavis,k.davis@cct.com,$2b$10$hashedpassword8,Kevin,Davis,555-0108,,Finance,Financial Analyst,2024-04-15,4,65000.00,active,finance_user,true,2024-09-14 14:20:00

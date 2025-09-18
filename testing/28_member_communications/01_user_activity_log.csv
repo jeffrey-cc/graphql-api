@@ -1,6 +1,0 @@
-user_id,company_id,activity_type,description,metadata,ip_address,created_at
-1,1,login,User logged in via web portal,"{""device"":""desktop"",""browser"":""Chrome""}",192.168.1.100,2024-09-16 09:00:00+00
-2,1,update,Updated pizza menu item pricing,"{""item_id"":1,""old_price"":18.99,""new_price"":19.99}",192.168.1.101,2024-09-16 09:15:00+00
-3,2,create,New delivery order received,"{""order_id"":""CB-20240916-001"",""amount"":25.98}",10.0.0.50,2024-09-16 09:30:00+00
-5,3,booking,Requested kitchen time for meal prep,"{""facility_id"":3002,""duration"":6}",172.16.0.25,2024-09-16 10:00:00+00
-8,5,payment,Payment processed successfully,"{""invoice_id"":""ST-2024-007"",""amount"":26.71}",192.168.3.100,2024-09-16 11:00:00+00

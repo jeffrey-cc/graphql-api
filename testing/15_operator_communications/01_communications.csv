@@ -1,6 +1,0 @@
-id,user_id,company_id,communication_roles,is_primary_contact
-1,1,,primary_contact,true
-2,2,,support_contact,false
-3,3,,billing_contact,false
-4,4,,operations_contact,false
-5,5,,admin_contact,true

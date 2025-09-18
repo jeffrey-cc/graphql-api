@@ -1,9 +1,0 @@
-id,ticket_number,communication_type,direction,subject,content,from_email,to_email,created_by_id
-1,TICK-001,email,inbound,Login issue,I cannot log into the operator portal since this morning,operator@example.com,support@platform.com,
-2,TICK-001,internal_note,internal,Investigating login issue,Checking auth service logs for errors,,,1
-3,TICK-002,email,outbound,Re: Missing invoice,We are generating your invoice and will send it shortly,support@platform.com,billing@customer.com,2
-4,TICK-003,chat,inbound,Feature request discussion,Can we schedule a call to discuss the CSV import feature?,operator@example.com,,
-5,TICK-004,phone,outbound,Performance investigation call,Called customer to gather more details about slowdown times,,,3
-6,TICK-005,email,inbound,Urgent: Payment failed,Our payment keeps failing and we need this resolved ASAP,finance@customer.com,support@platform.com,
-7,TICK-007,status_update,internal,Sync service restart,Restarted data sync service to resolve connection issues,,,1
-8,TICK-008,email,outbound,Password reset instructions,Please follow these steps to reset your password correctly,support@platform.com,user@customer.com,2

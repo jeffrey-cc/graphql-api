@@ -1,4 +1,0 @@
-operator_facility_id,name,address,city,state,postal_code,country,contact_info,created_at,updated_at
-3001,Kitchen Connect Toronto,123 Industrial Ave,Toronto,ON,M4M 2X1,CA,"{""phone"": ""416-555-0001"", ""email"": ""toronto@kitchenconnect.ca""}",2024-09-16 08:00:00+00,2024-09-16 08:00:00+00
-3002,Vancouver Ghost Kitchen Hub,456 Commercial Dr,Vancouver,BC,V5L 3X2,CA,"{""phone"": ""604-555-0002"", ""email"": ""vancouver@kitchenconnect.ca""}",2024-09-16 08:05:00+00,2024-09-16 08:05:00+00
-3003,Calgary Commercial Kitchen,789 Industrial Rd,Calgary,AB,T2E 6Z8,CA,"{""phone"": ""403-555-0003"", ""email"": ""calgary@kitchenconnect.ca""}",2024-09-16 08:10:00+00,2024-09-16 08:10:00+00

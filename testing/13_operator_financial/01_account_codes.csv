@@ -1,6 +1,0 @@
-code,name,description,tax_id,is_active,created_at,updated_at
-1000,Cash,Business cash accounts,,true,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-4000,Revenue,Revenue accounts,,true,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-5000,Expenses,Expense accounts,,true,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-2000,Accounts Receivable,Customer receivables,,true,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-3000,Accounts Payable,Vendor payables,,true,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00

@@ -1,5 +1,0 @@
-name,description,plan_type,monthly_price,annual_price,setup_fee,max_users,max_locations,included_booking_hours,overage_rate_per_hour,is_active,is_public,created_at,updated_at
-Starter Plan,Perfect for new cloud restaurants getting started,basic,299.00,2990.00,99.00,3,1,20,15.00,true,true,2024-09-16 08:00:00+00,2024-09-16 08:00:00+00
-Growth Plan,Ideal for expanding operations with multiple locations,standard,599.00,5990.00,199.00,10,3,50,12.00,true,true,2024-09-16 08:05:00+00,2024-09-16 08:05:00+00
-Professional Plan,Advanced features for established restaurant groups,premium,999.00,9990.00,299.00,25,5,100,10.00,true,true,2024-09-16 08:10:00+00,2024-09-16 08:10:00+00
-Enterprise Plan,Custom solution for large-scale operations,enterprise,1999.00,19990.00,499.00,100,10,250,8.00,true,false,2024-09-16 08:15:00+00,2024-09-16 08:15:00+00

@@ -1,6 +1,0 @@
-id,name,email_address,address,created_at,updated_at
-1,Downtown Kitchen,admin@downtown.com,"street=>""123 Main St"", city=>""Toronto"", zip=>""M5V1A1""",2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-2,Vancouver Hub,ops@vancouver.com,"street=>""456 Commercial Dr"", city=>""Vancouver"", zip=>""V5L3X9""",2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-3,Test Kitchen,test@test.com,"street=>""789 Queen St"", city=>""Toronto"", zip=>""M5H2M9""",2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-4,Demo Facility,demo@demo.com,"street=>""321 King St"", city=>""Montreal"", zip=>""H3A0G4""",2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-5,Sample Space,sample@sample.com,"street=>""654 Yonge St"", city=>""Toronto"", zip=>""M4Y1Z9""",2023-01-01 10:00:00+00,2023-01-01 10:00:00+00

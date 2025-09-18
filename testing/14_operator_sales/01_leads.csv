@@ -1,6 +1,0 @@
-id,facility_id,company_name,contact_first_name,contact_last_name,contact_email,contact_phone,status,created_by_user_id,created_at,updated_at
-1,1,Acme Foods,John,Smith,john@acme.com,416-555-1001,1,1,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-2,1,Best Cuisine,Jane,Doe,jane@best.com,416-555-1002,2,1,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-3,2,Chef Central,Bob,Wilson,bob@chef.com,416-555-1003,3,2,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-4,2,Delicious Co,Mary,Brown,mary@delicious.com,416-555-1004,1,2,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00
-5,3,Elite Eats,Tom,Green,tom@elite.com,416-555-1005,2,3,2023-01-01 10:00:00+00,2023-01-01 10:00:00+00

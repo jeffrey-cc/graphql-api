@@ -1,3 +1,0 @@
-id,name,principal_id,mime_type,width,height,data,created_at,updated_at
-1,sarah_avatar.png,2,image/png,128,128,\x89504e470d0a1a0a,2024-09-16 08:01:00+00,2024-09-16 08:01:00+00
-2,company_logo.jpg,1,image/jpeg,256,256,\xffd8ffe000104a46,2024-09-16 08:00:00+00,2024-09-16 08:00:00+00

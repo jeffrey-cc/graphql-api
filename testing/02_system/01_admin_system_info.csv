@@ -1,8 +1,0 @@
-info_type,info_key,info_value,description
-version,database_version,1.0.0,Current database schema version
-configuration,environment,development,Current environment
-configuration,max_upload_size,10485760,Maximum file upload size in bytes
-configuration,session_timeout,3600,Session timeout in seconds
-feature_flag,enable_2fa,true,Two-factor authentication enabled
-feature_flag,enable_sso,false,Single sign-on enabled
-maintenance,last_backup,2024-03-15T02:00:00Z,Last database backup timestamp

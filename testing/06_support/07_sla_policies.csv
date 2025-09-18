@@ -1,9 +1,0 @@
-id,name,description,applies_to,priority,response_time_hours,resolution_time_hours,escalation_time_hours,is_active
-1,Standard Support SLA,Basic support for standard tier customers,standard,low,48,120,96,true
-2,Standard Support SLA - Medium,Standard support for medium priority issues,standard,medium,24,72,48,true
-3,Premium Support SLA,Enhanced support for premium customers,premium,low,24,72,48,true
-4,Premium Support SLA - High,Premium support for high priority issues,premium,high,4,24,12,true
-5,Enterprise Support SLA,24/7 support for enterprise customers,enterprise,low,8,48,24,true
-6,Enterprise Support SLA - Critical,Enterprise critical issue support,enterprise,critical,1,8,4,true
-7,Enterprise Support SLA - Urgent,Enterprise urgent issue support,enterprise,urgent,2,12,6,true
-8,All Customers - Emergency,Emergency support for all tiers,all,critical,1,4,2,true
