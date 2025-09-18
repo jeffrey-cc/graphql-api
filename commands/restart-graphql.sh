@@ -60,28 +60,35 @@ if [ "$ENVIRONMENT" = "production" ]; then
     exit 1
 fi
 
-# Get repository path
-REPO_PATH="$(dirname "$SCRIPT_DIR")/${TIER}-graqhql-api"
+# Use shared GraphQL API directory for unified docker-compose
+SHARED_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Check if repository exists
-if [ ! -d "$REPO_PATH" ]; then
-    echo "${ERROR} Repository not found: $REPO_PATH"
+# Check for docker-compose.yml in shared directory
+if [ ! -f "$SHARED_DIR/docker-compose.yml" ]; then
+    echo "${ERROR} docker-compose.yml not found in $SHARED_DIR"
     exit 1
 fi
 
-# Check for docker-compose.yml
-if [ ! -f "$REPO_PATH/docker-compose.yml" ]; then
-    echo "${ERROR} docker-compose.yml not found in $REPO_PATH"
-    exit 1
-fi
+# Navigate to shared directory
+cd "$SHARED_DIR"
 
-# Navigate to repository
-cd "$REPO_PATH"
+# Determine service name based on tier
+case "$TIER" in
+    admin)
+        SERVICE_NAME="admin-graphql-server"
+        ;;
+    operator)
+        SERVICE_NAME="operator-graphql-server"
+        ;;
+    member)
+        SERVICE_NAME="member-graphql-server"
+        ;;
+esac
 
 # Stop the service
 echo ""
 echo "${PROGRESS} Stopping ${TIER} GraphQL service..."
-if docker-compose down 2>&1; then
+if docker-compose stop "$SERVICE_NAME" 2>&1; then
     echo "${SUCCESS} Service stopped successfully"
 else
     echo "${WARNING} Service may not have been running"
@@ -93,7 +100,7 @@ sleep 2
 # Start the service
 echo ""
 echo "${PROGRESS} Starting ${TIER} GraphQL service..."
-if docker-compose up -d 2>&1; then
+if docker-compose up -d "$SERVICE_NAME" 2>&1; then
     echo "${SUCCESS} Service started successfully"
 else
     echo "${ERROR} Failed to start service"

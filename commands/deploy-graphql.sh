@@ -137,11 +137,28 @@ if [[ "$ENVIRONMENT" == "development" ]]; then
     log_progress "Starting Docker services for $TIER..."
     
     # Change to tier repository for docker-compose
-    cd "$TIER_REPOSITORY_PATH"
+    # Change to shared GraphQL API directory for unified docker-compose
+    cd "$SCRIPT_DIR/.."
     
-    # Start services
-    if ! docker-compose up -d; then
-        die "Failed to start Docker services"
+    # Determine service name based on tier
+    case "$TIER" in
+        admin)
+            SERVICE_NAME="admin-graphql-server"
+            ;;
+        operator)
+            SERVICE_NAME="operator-graphql-server"
+            ;;
+        member)
+            SERVICE_NAME="member-graphql-server"
+            ;;
+        *)
+            die "Invalid tier: $TIER"
+            ;;
+    esac
+    
+    # Start services using unified docker-compose
+    if ! docker-compose up -d "$SERVICE_NAME"; then
+        die "Failed to start Docker service: $SERVICE_NAME"
     fi
     
     # Wait for GraphQL service

@@ -79,7 +79,7 @@ configure_tier() {
     esac
     
     # Set tier-specific paths
-    TIER_REPOSITORY_PATH="../${tier}-graqhql-api"
+    TIER_REPOSITORY_PATH="../graphql-${tier}-api"
     TIER_CONFIG_DIR="$TIER_REPOSITORY_PATH/config"
     TIER_METADATA_DIR="$TIER_REPOSITORY_PATH/metadata"
     TIER_TESTING_DIR="$TIER_REPOSITORY_PATH/testing"
@@ -533,119 +533,65 @@ track_relationships() {
     
     log_progress "Tracking relationships for $tier ($environment)..."
     
+    # Use the smart relationship tracking script
+    local smart_script="$SCRIPT_DIR/track-relationships-smart.sh"
+    
+    if [[ -f "$smart_script" ]]; then
+        # Call the smart relationship tracking script
+        log_info "Using smart relationship tracking..."
+        if "$smart_script" "$tier" "$environment" 2>/dev/null; then
+            log_success "Smart relationship tracking completed"
+            return 0
+        else
+            log_warning "Smart relationship tracking failed, falling back to basic tracking"
+        fi
+    fi
+    
+    # Fallback to basic relationship tracking if smart script fails
+    log_info "Using basic relationship tracking..."
+    
     local endpoint="$GRAPHQL_TIER_ENDPOINT"
     local source_name="default"
     
-    # Get current metadata to analyze foreign keys
-    log_detail "Analyzing foreign key relationships..."
+    # Try using pg_suggest_relationships API for suggested relationships
+    local suggest_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
+        "{\"type\": \"pg_suggest_relationships\", \"args\": {\"source\": \"$source_name\", \"omit_tracked\": true}}" \
+        "Get suggested relationships")
     
-    # Get foreign keys from database
-    local fk_query="SELECT
-        tc.table_schema,
-        tc.table_name,
-        kcu.column_name,
-        ccu.table_schema AS foreign_table_schema,
-        ccu.table_name AS foreign_table_name,
-        ccu.column_name AS foreign_column_name,
-        tc.constraint_name
-    FROM information_schema.table_constraints AS tc
-    JOIN information_schema.key_column_usage AS kcu
-        ON tc.constraint_name = kcu.constraint_name
-        AND tc.table_schema = kcu.table_schema
-    JOIN information_schema.constraint_column_usage AS ccu
-        ON ccu.constraint_name = tc.constraint_name
-        AND ccu.table_schema = tc.table_schema
-    WHERE tc.constraint_type = 'FOREIGN KEY'
-        AND tc.table_schema NOT IN ('information_schema', 'pg_catalog', 'hdb_catalog')
-    ORDER BY tc.table_schema, tc.table_name;"
-    
-    local fk_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-        "{\"type\": \"run_sql\", \"args\": {\"source\": \"$source_name\", \"sql\": \"$fk_query\"}}" \
-        "Get foreign keys")
-    
-    if [[ $? -ne 0 ]]; then
-        log_warning "Could not get foreign keys, trying metadata-based approach..."
-        
-        # Try pg_suggest_relationships API
-        local suggest_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-            "{\"type\": \"pg_suggest_relationships\", \"args\": {\"source\": \"$source_name\", \"omit_tracked\": true}}" \
-            "Suggest relationships")
-        
-        if [[ $? -ne 0 ]]; then
-            # Final fallback: reload metadata
-            local reload_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-                '{"type": "reload_metadata", "args": {"reload_remote_schemas": true, "reload_sources": true}}' \
-                "Reload metadata")
+    if [[ $? -eq 0 ]]; then
+        local relationship_count=$(echo "$suggest_response" | jq '.relationships | length' 2>/dev/null || echo "0")
+        if [[ "$relationship_count" -gt 0 ]]; then
+            log_info "Found $relationship_count suggested relationships"
             
-            if [[ $? -eq 0 ]]; then
-                log_success "Metadata reloaded for relationship discovery"
-                return 0
-            else
-                log_error "Failed to process relationships"
-                return 1
-            fi
-        fi
-        
-        # Process suggested relationships
-        local relationships=$(echo "$suggest_response" | jq -r '.relationships[]?' 2>/dev/null)
-        
-        if [[ -n "$relationships" ]]; then
-            log_info "Found suggested relationships to track"
-            # Would process each relationship here
-            return 0
+            # Track each suggested relationship
+            echo "$suggest_response" | jq -r '.relationships[]' 2>/dev/null | while read -r rel; do
+                local rel_type=$(echo "$rel" | jq -r '.type' 2>/dev/null)
+                local from_table_schema=$(echo "$rel" | jq -r '.from.table.schema' 2>/dev/null)
+                local from_table_name=$(echo "$rel" | jq -r '.from.table.name' 2>/dev/null)
+                local to_table_schema=$(echo "$rel" | jq -r '.to.table.schema' 2>/dev/null)
+                local to_table_name=$(echo "$rel" | jq -r '.to.table.name' 2>/dev/null)
+                local constraint_name=$(echo "$rel" | jq -r '.to.constraint_name' 2>/dev/null)
+                
+                if [[ "$rel_type" == "array" && -n "$from_table_schema" && -n "$from_table_name" ]]; then
+                    local rel_name="${to_table_schema}_${to_table_name}s"
+                    execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
+                        "{\"type\": \"pg_create_array_relationship\", \"args\": {\"source\": \"$source_name\", \"table\": {\"schema\": \"$from_table_schema\", \"name\": \"$from_table_name\"}, \"name\": \"$rel_name\", \"using\": {\"foreign_key_constraint_on\": {\"table\": {\"schema\": \"$to_table_schema\", \"name\": \"$to_table_name\"}, \"column\": \"$(echo "$rel" | jq -r '.to.columns[0]')\"}}}}" \
+                        "Create array relationship" >/dev/null 2>&1
+                fi
+            done
+            
+            log_success "Processed suggested relationships"
         else
-            log_info "No new relationships to track"
-            return 0
+            log_info "No suggested relationships found"
         fi
+    else
+        log_warning "Could not get suggested relationships"
     fi
     
-    # Parse foreign key results
-    local fks=$(echo "$fk_response" | jq -r '.result[1:][]? | @csv' 2>/dev/null | sed 's/"//g')
-    
-    if [[ -z "$fks" ]]; then
-        log_info "No foreign key relationships found"
-        return 0
-    fi
-    
-    local tracked_count=0
-    local failed_count=0
-    
-    # Track each relationship
-    while IFS=',' read -r schema table column ref_schema ref_table ref_column constraint_name; do
-        if [[ -n "$schema" && -n "$table" && -n "$ref_table" ]]; then
-            # Create relationship name based on constraint
-            local rel_name="${table}_${ref_table}"
-            
-            log_detail "Creating relationship: $schema.$table -> $ref_schema.$ref_table"
-            
-            # Object relationship (many-to-one)
-            local obj_rel_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-                "{\"type\": \"pg_create_object_relationship\", \"args\": {\"source\": \"$source_name\", \"table\": {\"schema\": \"$schema\", \"name\": \"$table\"}, \"name\": \"$ref_table\", \"using\": {\"foreign_key_constraint_on\": \"$column\"}}}" \
-                "Create object relationship")
-            
-            if [[ $? -eq 0 ]]; then
-                ((tracked_count++))
-            fi
-            
-            # Array relationship (one-to-many, from referenced table back)
-            local arr_rel_response=$(execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
-                "{\"type\": \"pg_create_array_relationship\", \"args\": {\"source\": \"$source_name\", \"table\": {\"schema\": \"$ref_schema\", \"name\": \"$ref_table\"}, \"name\": \"${table}s\", \"using\": {\"foreign_key_constraint_on\": {\"table\": {\"schema\": \"$schema\", \"name\": \"$table\"}, \"column\": \"$column\"}}}}" \
-                "Create array relationship")
-            
-            if [[ $? -eq 0 ]]; then
-                ((tracked_count++))
-            else
-                ((failed_count++))
-            fi
-        fi
-    done <<< "$fks"
-    
-    if [[ $tracked_count -gt 0 ]]; then
-        log_success "Created $tracked_count relationships"
-    fi
-    if [[ $failed_count -gt 0 ]]; then
-        log_warning "$failed_count relationships failed (may already exist)"
-    fi
+    # Always reload metadata to ensure consistency
+    execute_hasura_api "$endpoint" "$GRAPHQL_TIER_ADMIN_SECRET" \
+        '{"type": "reload_metadata", "args": {"reload_remote_schemas": true, "reload_sources": true}}' \
+        "Reload metadata" >/dev/null 2>&1
     
     return 0
 }

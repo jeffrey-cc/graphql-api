@@ -150,37 +150,49 @@ fi
 # Start timing
 start_timer
 
-# Change to tier repository for docker-compose operations
-log_progress "Changing to tier repository: $TIER_REPOSITORY_PATH"
-cd "$TIER_REPOSITORY_PATH"
+# Change to shared GraphQL API directory for unified docker-compose operations
+log_progress "Changing to shared GraphQL API directory for unified stack operations"
+cd "$SCRIPT_DIR/.."
 
-# Stop and remove containers with volumes
-log_progress "Stopping and removing containers with volumes..."
-if ! docker-compose down -v --remove-orphans; then
-    log_warning "Docker compose down failed, attempting manual cleanup"
+# Determine service name based on tier
+case "$TIER" in
+    admin)
+        SERVICE_NAME="admin-graphql-server"
+        ;;
+    operator)
+        SERVICE_NAME="operator-graphql-server"
+        ;;
+    member)
+        SERVICE_NAME="member-graphql-server"
+        ;;
+    *)
+        die "Invalid tier: $TIER"
+        ;;
+esac
+
+# Stop and remove specific tier container with volumes
+log_progress "Stopping and removing $SERVICE_NAME container with volumes..."
+if ! docker-compose rm -s -f -v "$SERVICE_NAME"; then
+    log_warning "Docker compose rm failed, attempting manual cleanup"
     
     # Manual cleanup
-    docker stop "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-    docker rm "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-    docker volume rm "$GRAPHQL_TIER_VOLUME" 2>/dev/null || true
+    docker stop "$SERVICE_NAME" 2>/dev/null || true
+    docker rm "$SERVICE_NAME" 2>/dev/null || true
 fi
 
-# Verify containers are gone
-log_progress "Verifying container removal..."
-container_status=$(get_container_status "$GRAPHQL_TIER_CONTAINER")
-if [[ "$container_status" != "not_exists" ]]; then
-    log_warning "Container still exists, forcing removal..."
-    docker rm -f "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-fi
+# Remove tier-specific volume
+log_progress "Removing tier-specific volume..."
+VOLUME_NAME="shared-graphql-api_${TIER}_graphql_metadata"
+docker volume rm "$VOLUME_NAME" 2>/dev/null || true
 
 # Remove any dangling volumes
 log_progress "Cleaning up dangling volumes..."
 docker volume prune -f >/dev/null 2>&1 || true
 
-# Start fresh containers
-log_progress "Starting fresh containers..."
-if ! docker-compose up -d; then
-    die "Failed to start fresh containers"
+# Start fresh container for this tier
+log_progress "Starting fresh $SERVICE_NAME container..."
+if ! docker-compose up -d "$SERVICE_NAME"; then
+    die "Failed to start fresh $SERVICE_NAME container"
 fi
 
 # Wait for GraphQL service to be ready

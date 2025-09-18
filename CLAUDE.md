@@ -12,9 +12,9 @@ This is the **Shared GraphQL API** repository - a unified command framework that
 - **Parent Directory**: `/Users/cc/Desktop/v3/` (Master orchestration folder for 12-repository system)
 - **Current Location**: `/Users/cc/Desktop/v3/shared-graphql-api/` (Shared GraphQL command center)
 - **Child Repositories**: 
-  - `../admin-graqhql-api/` (Admin tier GraphQL API)
-  - `../operator-graqhql-api/` (Operator tier GraphQL API)
-  - `../member-graqhql-api/` (Member tier GraphQL API)
+  - `../graphql-admin-api/` (Admin tier GraphQL API)
+  - `../graphql-operator-api/` (Operator tier GraphQL API)
+  - `../graphql-member-api/` (Member tier GraphQL API)
 - **Sibling System**: `../shared-database-sql/` (Centralized database management)
 
 ### Role in Three-Tier Architecture
@@ -41,7 +41,7 @@ The system manages three separate Hasura GraphQL APIs with clear sequential port
 - Consistent numbering makes it clear which services belong together
 
 ### Integration with Child Repositories
-Each tier has its own repository (`admin-graqhql-api`, `operator-graqhql-api`, `member-graqhql-api`) that:
+Each tier has its own repository (`graphql-admin-api`, `graphql-operator-api`, `graphql-member-api`) that:
 - Contains tier-specific metadata in `metadata/` directory (Hasura GraphQL metadata)
 - Stores environment configs in `config/` directory (development.env, production.env)
 - Includes testing data and scripts in `testing/` directory
@@ -67,13 +67,13 @@ Hasura Cloud deployments use containerized deployments, not docker-compose apps.
 ### Local Development Deployment
 ```bash
 # Deploy admin GraphQL API
-cd admin-graqhql-api && docker-compose up -d
+cd graphql-admin-api && docker-compose up -d
 
 # Deploy operator GraphQL API  
-cd operator-graqhql-api && docker-compose up -d
+cd graphql-operator-api && docker-compose up -d
 
 # Deploy member GraphQL API
-cd member-graqhql-api && docker-compose up -d
+cd graphql-member-api && docker-compose up -d
 
 # Stop any GraphQL API
 docker-compose down
@@ -94,11 +94,14 @@ Each tier repository contains a `docker-compose.yml` that properly configures:
 All shared commands follow the pattern: `./command.sh <tier> <environment> [options]`
 Where tier = `admin`, `operator`, or `member` and environment = `development` or `production`
 
-### 📚 Complete Command Index (31 Commands + 4 Testing)
+### 📚 Complete Command Index (34 Commands + 4 Testing)
 
 #### Core Operations (Most Used)
-- `fast-refresh.sh` - Reload metadata only (1-3 seconds) ⚡
-- `rebuild-docker.sh` - Complete container rebuild (dev only, 30-45s) 🔨
+- `fast-refresh.sh` - Reload metadata + track ALL relationships (1-3 seconds) ⚡
+- `rebuild-docker.sh` - Complete container rebuild + track ALL relationships (dev only, 30-45s) 🔨
+- `refresh-all.sh` - Refresh all tiers in parallel with relationships 🚀
+- `rebuild-all.sh` - Rebuild all tiers (Docker in dev, refresh in prod) 🚀
+- `track-relationships-smart.sh` - Smart relationship tracking via database scan 🔗
 - `full-rebuild.sh` - Smart rebuild (Docker in dev, refresh in prod)
 - `deploy-graphql.sh` - Full deployment with metadata
 - `test-health.sh` - Check GraphQL health status
@@ -210,11 +213,17 @@ curl -s -X POST -H "Content-Type: application/json" \
 # Full GraphQL API deployment with metadata and table tracking
 ./commands/deploy-graphql.sh <tier> <environment>
 
-# Lightning-fast metadata refresh without container restart (1-3 seconds)
+# Lightning-fast metadata refresh + automatic relationship tracking (1-3 seconds)
 ./commands/fast-refresh.sh <tier> <environment>
 
-# Complete Docker container rebuild (nuclear option, 30-45 seconds)
+# Complete Docker container rebuild + automatic relationship tracking (30-45 seconds)
 ./commands/rebuild-docker.sh <tier> <environment>
+
+# Refresh all tiers in parallel with relationships (fastest option)
+./commands/refresh-all.sh <environment>
+
+# Rebuild all tiers: Docker in dev, refresh in prod (complete reset)
+./commands/rebuild-all.sh <environment>
 ```
 
 #### Docker Container Management
@@ -239,7 +248,33 @@ curl -s -X POST -H "Content-Type: application/json" \
 
 # Track foreign key relationships for nested queries
 ./commands/track-relationships.sh <tier> <environment>
+
+# Smart relationship tracking - scans database and creates ALL relationships
+./commands/track-relationships-smart.sh <tier> <environment>
 ```
+
+#### 🔗 Smart Relationship Tracking System
+
+**CRITICAL**: All refresh and rebuild commands now **automatically track ALL relationships**!
+
+The system includes a sophisticated relationship tracking mechanism that:
+
+1. **Scans Database**: Queries `information_schema` for all foreign key constraints
+2. **Creates Object Relationships**: Many-to-one relationships (e.g., `contact.company`)
+3. **Creates Array Relationships**: One-to-many relationships (e.g., `company.contacts`)
+4. **Handles All Schemas**: Tracks relationships across admin, operators, compliance, financial, sales, support, system, and integration schemas
+5. **Verifies Success**: Counts relationship fields in GraphQL schema to ensure tracking worked
+
+**No Manual Work Required**: Every `fast-refresh.sh`, `rebuild-docker.sh`, `refresh-all.sh`, and `rebuild-all.sh` command automatically:
+- Purges existing metadata
+- Tracks all tables, views, enums, and functions
+- **Tracks ALL foreign key relationships**
+- Verifies relationships are working
+
+**Relationship Verification**: After any refresh/rebuild, you should see:
+- 100+ relationship fields in GraphQL schema
+- Nested queries working (e.g., `{ companies { contacts { name } } }`)
+- Both object and array relationships functional
 
 #### Verification & Health Checks
 ```bash
@@ -375,8 +410,8 @@ shared-graphql-api/
 ├── version/                            # Version management
 └── Tier repositories (../)            # Individual tier repos
     ├── admin-graqhql-api/
-    ├── operator-graqhql-api/
-    └── member-graqhql-api/
+    ├── graphql-operator-api/
+    └── graphql-member-api/
 ```
 
 ### Key Functions in _shared_functions.sh
@@ -485,8 +520,8 @@ These commands exist in individual tier repositories but could be candidates for
 
 ### Downstream Consumers (Child Repositories)
 - **Admin GraphQL API** (`../admin-graqhql-api/`): Franchisor operations
-- **Operator GraphQL API** (`../operator-graqhql-api/`): Facility management
-- **Member GraphQL API** (`../member-graqhql-api/`): Member operations
+- **Operator GraphQL API** (`../graphql-operator-api/`): Facility management
+- **Member GraphQL API** (`../graphql-member-api/`): Member operations
   - Each maintains tier-specific business logic and metadata
   - All delegate command execution to this shared system
   - Each has specialized CLAUDE.md for their domain context

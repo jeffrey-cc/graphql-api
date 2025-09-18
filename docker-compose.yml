@@ -1,0 +1,128 @@
+services:
+  admin-graphql-server:
+    image: hasura/graphql-engine:v2.40.0
+    container_name: admin-graphql-server
+    restart: unless-stopped
+    environment:
+      # Database
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://admin:CCTech2024Admin!@host.docker.internal:7101/admin_database
+      
+      # GraphQL Engine Configuration
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://admin:CCTech2024Admin!@host.docker.internal:7101/admin_database
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      
+      # Admin Secret
+      HASURA_GRAPHQL_ADMIN_SECRET: CCTech2024Admin
+      
+      # CORS
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      
+      # Security
+      HASURA_GRAPHQL_DISABLE_CORS: "false"
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      
+      # Performance
+      HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
+      
+    ports:
+      - "8101:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - shared_graphql_network
+
+  operator-graphql-server:
+    image: hasura/graphql-engine:v2.40.0
+    container_name: operator-graphql-server
+    restart: unless-stopped
+    environment:
+      # Database
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://operator:CCTech2024Operator!@host.docker.internal:7102/operator_database
+      
+      # GraphQL Engine Configuration
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://operator:CCTech2024Operator!@host.docker.internal:7102/operator_database
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      
+      # Admin Secret
+      HASURA_GRAPHQL_ADMIN_SECRET: CCTech2024Operator
+      
+      # CORS
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      
+      # Security
+      HASURA_GRAPHQL_DISABLE_CORS: "false"
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      
+      # Performance
+      HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
+      
+    ports:
+      - "8102:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - shared_graphql_network
+
+  member-graphql-server:
+    image: hasura/graphql-engine:v2.40.0
+    container_name: member-graphql-server
+    restart: unless-stopped
+    environment:
+      # Database
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://member:CCTech2024Member!@host.docker.internal:7103/member_database
+      
+      # GraphQL Engine Configuration
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://member:CCTech2024Member!@host.docker.internal:7103/member_database
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      
+      # Admin Secret
+      HASURA_GRAPHQL_ADMIN_SECRET: CCTech2024Member
+      
+      # CORS
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      
+      # Security
+      HASURA_GRAPHQL_DISABLE_CORS: "false"
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      
+      # Performance
+      HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
+      
+    ports:
+      - "8103:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - shared_graphql_network
+
+
+volumes:
+  admin_graphql_metadata:
+    driver: local
+  operator_graphql_metadata:
+    driver: local
+  member_graphql_metadata:
+    driver: local
+
+networks:
+  shared_graphql_network:
+    driver: bridge
+    name: shared_graphql_network

@@ -1,253 +1,135 @@
 #!/bin/bash
 
-# ============================================================================
-# SHARED GRAPHQL DOCKER STOP
-# Community Connect Tech - Shared GraphQL API System
-# ============================================================================
-# Stop Docker container for any GraphQL tier
-# Usage: ./docker-stop.sh <tier> <environment> [options]
-# ============================================================================
+# ================================================================================
+# Docker Stop Command - Stop GraphQL Container(s) Using Docker Compose
+# ================================================================================
+# Stops one or more GraphQL containers managed by docker-compose
+# Usage: ./docker-stop.sh [tier...] (admin, operator, member, or all)
+# ================================================================================
 
-set -e
+set -euo pipefail
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source shared functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
-# Show help information
+# ================================================================================
+# Help Documentation
+# ================================================================================
+
 show_help() {
     cat << EOF
 Shared GraphQL API - Docker Stop Command
 
 DESCRIPTION:
-    Stop the Docker container for the specified GraphQL tier.
-    This command will:
-    - Configure tier-specific Docker settings
-    - Stop the running GraphQL container
-    - Optionally remove volumes and clean up
+    Stop GraphQL Docker container(s) for specified tier(s) using unified docker-compose stack.
 
 USAGE:
-    ./docker-stop.sh <tier> <environment> [options]
+    ./docker-stop.sh [tier...] (admin, operator, member, or all)
 
 ARGUMENTS:
-    tier           One of: admin, operator, member
-    environment    Either 'production' or 'development'
-
-OPTIONS:
-    -h, --help     Show this help message
-    --remove-volumes   Remove Docker volumes (destructive)
-    --force        Force stop without confirmation
+    tier              GraphQL tier(s) to stop:
+                      - admin: Stop admin GraphQL container
+                      - operator: Stop operator GraphQL container
+                      - member: Stop member GraphQL container
+                      - all: Stop all GraphQL containers
+                      Multiple tiers can be specified
 
 EXAMPLES:
-    ./docker-stop.sh member development        # Stop member container
-    ./docker-stop.sh admin development --remove-volumes  # Stop and remove volumes
+    Stop admin GraphQL container:
+    ./docker-stop.sh admin
+
+    Stop multiple containers:
+    ./docker-stop.sh admin operator
+
+    Stop all GraphQL containers:
+    ./docker-stop.sh all
 
 NOTES:
-    - Only applies to development environment (uses Docker)
-    - Production uses Hasura Cloud (no local containers)
-    - --remove-volumes will delete all container data
+    - Uses unified docker-compose.yml stack
+    - Gracefully stops containers without removing them
+    - Part of shared GraphQL API management system
 EOF
 }
 
-# Parse command line arguments
-TIER=""
-ENVIRONMENT=""
-REMOVE_VOLUMES=false
-FORCE=false
+# ================================================================================
+# Parse Arguments
+# ================================================================================
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-        --remove-volumes)
-            REMOVE_VOLUMES=true
-            shift
-            ;;
-        --force)
-            FORCE=true
-            shift
-            ;;
-        *)
-            if [[ -z "$TIER" ]]; then
-                TIER="$1"
-            elif [[ -z "$ENVIRONMENT" ]]; then
-                ENVIRONMENT="$1"
-            else
-                log_error "Unknown argument: $1"
-                show_help
-                exit 1
-            fi
-            shift
-            ;;
-    esac
-done
-
-# Validate arguments
-if [[ -z "$TIER" || -z "$ENVIRONMENT" ]]; then
-    log_error "Both tier and environment arguments are required"
+if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    if [[ $# -eq 0 ]]; then
+        log_error "At least one tier argument is required"
+    fi
     show_help
-    exit 1
-fi
-
-# Configure tier and validate
-if ! configure_tier "$TIER"; then
-    die "Failed to configure tier: $TIER"
-fi
-
-validate_environment "$ENVIRONMENT"
-
-# Load tier-specific configuration
-if ! load_tier_config "$TIER" "$ENVIRONMENT"; then
-    log_warning "Could not load tier configuration, using defaults"
-fi
-
-# Check prerequisites
-check_prerequisites
-
-# Discover tier repository
-if ! discover_tier_repository "$TIER"; then
-    die "Could not find tier repository"
-fi
-
-section_header "🛑 SHARED GRAPHQL DOCKER STOP - $(echo $TIER | tr '[:lower:]' '[:upper:]') TIER"
-log_info "Tier: $TIER"
-log_info "Environment: $ENVIRONMENT"
-log_info "Container: $GRAPHQL_TIER_CONTAINER"
-log_info "Repository: $TIER_REPOSITORY_PATH"
-
-# Production check - no Docker containers in production
-if [[ "$ENVIRONMENT" == "production" ]]; then
-    log_warning "Production environment uses Hasura Cloud, not Docker containers"
-    log_info "Skipping Docker stop for production"
     exit 0
 fi
 
-# Volume removal confirmation
-if [[ "$REMOVE_VOLUMES" == "true" && "$FORCE" != "true" ]]; then
-    echo ""
-    log_warning "⚠️  VOLUME REMOVAL REQUESTED ⚠️"
-    log_warning "This will permanently delete all GraphQL metadata and configuration"
-    echo ""
-    read -p "Are you sure you want to remove volumes? (y/N): " confirm
-    
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        log_info "Operation cancelled by user"
-        exit 0
+# Collect all tier arguments
+TIERS=("$@")
+
+# ================================================================================
+# Main Logic
+# ================================================================================
+
+main() {
+    section_header "Stopping GraphQL Docker Container(s)"
+
+    # Check if docker-compose.yml exists
+    if [[ ! -f "$PARENT_DIR/docker-compose.yml" ]]; then
+        log_error "docker-compose.yml not found in $PARENT_DIR"
+        exit 1
     fi
-fi
 
-# Start timing
-start_timer
+    # Change to parent directory for docker-compose
+    cd "$PARENT_DIR"
 
-# Check if Docker is running
-if ! check_docker_running; then
-    log_warning "Docker is not running - containers may already be stopped"
-fi
+    local services_to_stop=()
 
-# Check current container status
-container_status=$(get_container_status "$GRAPHQL_TIER_CONTAINER")
-log_detail "Current container status: $container_status"
+    # Process tier arguments
+    for tier in "${TIERS[@]}"; do
+        case "$tier" in
+            admin)
+                services_to_stop+=("admin-graphql-server")
+                ;;
+            operator)
+                services_to_stop+=("operator-graphql-server")
+                ;;
+            member)
+                services_to_stop+=("member-graphql-server")
+                ;;
+            all)
+                services_to_stop=("admin-graphql-server" "operator-graphql-server" "member-graphql-server")
+                break
+                ;;
+            *)
+                log_error "Invalid tier: $tier (must be admin, operator, member, or all)"
+                exit 1
+                ;;
+        esac
+    done
 
-case "$container_status" in
-    "running")
-        log_progress "Stopping running container..."
-        
-        # Change to tier repository for docker-compose
-        cd "$TIER_REPOSITORY_PATH"
-        
-        if [[ "$REMOVE_VOLUMES" == "true" ]]; then
-            log_warning "Stopping container and removing volumes..."
-            if docker-compose down -v; then
-                log_success "Container stopped and volumes removed"
-            else
-                log_warning "docker-compose failed, trying manual stop..."
-                docker stop "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-                docker rm "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-                docker volume rm "$GRAPHQL_TIER_VOLUME" 2>/dev/null || true
-                log_success "Container stopped manually"
-            fi
-        else
-            if docker-compose stop; then
-                log_success "Container stopped successfully"
-            else
-                log_warning "docker-compose failed, trying manual stop..."
-                if docker stop "$GRAPHQL_TIER_CONTAINER"; then
-                    log_success "Container stopped manually"
-                else
-                    log_error "Failed to stop container"
-                fi
-            fi
-        fi
-        ;;
-        
-    "stopped")
-        log_info "Container '$GRAPHQL_TIER_CONTAINER' is already stopped"
-        
-        if [[ "$REMOVE_VOLUMES" == "true" ]]; then
-            log_progress "Removing volumes for stopped container..."
-            cd "$TIER_REPOSITORY_PATH"
-            
-            docker-compose down -v 2>/dev/null || true
-            docker rm "$GRAPHQL_TIER_CONTAINER" 2>/dev/null || true
-            docker volume rm "$GRAPHQL_TIER_VOLUME" 2>/dev/null || true
-            
-            log_success "Volumes removed"
-        fi
-        ;;
-        
-    "not_exists")
-        log_info "Container '$GRAPHQL_TIER_CONTAINER' does not exist"
-        
-        if [[ "$REMOVE_VOLUMES" == "true" ]]; then
-            log_progress "Cleaning up any orphaned volumes..."
-            docker volume rm "$GRAPHQL_TIER_VOLUME" 2>/dev/null || true
-            log_info "Cleanup completed"
-        fi
-        ;;
-        
-    *)
-        log_warning "Unknown container status: $container_status"
-        log_progress "Attempting to stop anyway..."
-        
-        cd "$TIER_REPOSITORY_PATH"
-        
-        if [[ "$REMOVE_VOLUMES" == "true" ]]; then
-            docker-compose down -v 2>/dev/null || true
-        else
-            docker-compose stop 2>/dev/null || true
-        fi
-        
-        log_info "Stop attempt completed"
-        ;;
-esac
+    # Stop the containers
+    log_progress "Stopping containers: ${services_to_stop[*]}"
 
-# Return to shared directory
-cd "$SCRIPT_DIR/.."
+    if docker-compose stop "${services_to_stop[@]}"; then
+        log_success "Successfully stopped container(s)"
+    else
+        log_error "Failed to stop container(s)"
+        exit 1
+    fi
 
-# Verify container is stopped
-final_status=$(get_container_status "$GRAPHQL_TIER_CONTAINER")
-case "$final_status" in
-    "not_exists"|"stopped")
-        log_success "Container is properly stopped"
-        ;;
-    "running")
-        log_warning "Container may still be running"
-        ;;
-    *)
-        log_detail "Final container status: $final_status"
-        ;;
-esac
+    # Show status
+    log_progress "Current container status:"
+    docker-compose ps
 
-# Success summary
-print_operation_summary "Docker Stop" "$TIER" "$ENVIRONMENT"
+    print_operation_summary "Docker Stop" "${TIERS[*]}" "development"
+}
 
-log_success "Docker stop operation completed!"
-if [[ "$REMOVE_VOLUMES" == "true" ]]; then
-    log_info "All volumes and data have been removed"
-else
-    log_info "Container data preserved (use --remove-volumes to clean up)"
-fi
-# Return success exit code
-exit 0
+# Set trap for error handling
+trap 'log_error "Script failed on line $LINENO"' ERR
+
+# Run main function
+main

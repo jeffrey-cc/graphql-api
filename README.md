@@ -155,20 +155,20 @@ configure_tier "member"
 ### Environment Configuration
 
 Each tier repository maintains its own environment configurations:
-- `admin-graqhql-api/config/development.env`
-- `admin-graqhql-api/config/production.env`
-- `operator-graqhql-api/config/development.env`
-- `operator-graqhql-api/config/production.env`
-- `member-graqhql-api/config/development.env`
-- `member-graqhql-api/config/production.env`
+- `graphql-admin-api/config/development.env`
+- `graphql-admin-api/config/production.env`
+- `graphql-operator-api/config/development.env`
+- `graphql-operator-api/config/production.env`
+- `graphql-member-api/config/development.env`
+- `graphql-member-api/config/production.env`
 
 The shared commands automatically locate and load the appropriate configuration file.
 
 ### Resource Discovery System
 
 Commands automatically discover resources from the tier-specific repositories:
-- **Metadata** from `[tier]-graqhql-api/metadata/` (Hasura metadata exports)
-- **Environment configs** from `[tier]-graqhql-api/config/` (development.env, production.env)
+- **Metadata** from `graphql-[tier]-api/metadata/` (Hasura metadata exports)
+- **Environment configs** from `graphql-[tier]-api/config/` (development.env, production.env)
 - **Database connections** via tier-specific database URLs
 - **Test data** via delegation to shared-database-sql system
 
@@ -215,9 +215,9 @@ Commands automatically discover resources from the tier-specific repositories:
 
 ### Completed Migrations ✅
 - **All three tier repositories**: Fully migrated to shared system architecture
-- **admin-graqhql-api**: Complete migration with wrapper commands
-- **operator-graqhql-api**: Complete migration with wrapper commands  
-- **member-graqhql-api**: Complete migration with wrapper commands
+- **graphql-admin-api**: Complete migration with wrapper commands
+- **graphql-operator-api**: Complete migration with wrapper commands  
+- **graphql-member-api**: Complete migration with wrapper commands
 
 ### System Status
 All GraphQL API tiers now use the unified shared command system with 95%+ code reduction achieved.

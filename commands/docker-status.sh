@@ -1,262 +1,232 @@
 #!/bin/bash
 
-# ============================================================================
-# SHARED GRAPHQL DOCKER STATUS
-# Community Connect Tech - Shared GraphQL API System
-# ============================================================================
-# Check Docker container status for any GraphQL tier
-# Usage: ./docker-status.sh <tier> <environment> [options]
-# ============================================================================
+# ================================================================================
+# Docker Status Command - Show GraphQL Container Status Using Docker Compose
+# ================================================================================
+# Shows status of GraphQL containers managed by docker-compose
+# Usage: ./docker-status.sh [tier...] (admin, operator, member, or all)
+# ================================================================================
 
-set -e
+set -euo pipefail
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source shared functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
-# Show help information
+# ================================================================================
+# Help Documentation
+# ================================================================================
+
 show_help() {
     cat << EOF
 Shared GraphQL API - Docker Status Command
 
 DESCRIPTION:
-    Check the Docker container status for the specified GraphQL tier.
-    This command will:
-    - Configure tier-specific Docker settings
-    - Check container running status
-    - Display port mappings and health info
-    - Test GraphQL service connectivity
+    Show status of GraphQL Docker container(s) for specified tier(s) using unified docker-compose stack.
 
 USAGE:
-    ./docker-status.sh <tier> <environment> [options]
+    ./docker-status.sh [tier...] (admin, operator, member, or all)
 
 ARGUMENTS:
-    tier           One of: admin, operator, member
-    environment    Either 'production' or 'development'
-
-OPTIONS:
-    -h, --help     Show this help message
-    --detailed     Show detailed container information
-    --logs         Show recent container logs
+    tier              GraphQL tier(s) to check (optional):
+                      - admin: Show admin GraphQL container status
+                      - operator: Show operator GraphQL container status
+                      - member: Show member GraphQL container status
+                      - all: Show all GraphQL container status
+                      - (no args): Show all containers status
 
 EXAMPLES:
-    ./docker-status.sh member development     # Check member container status
-    ./docker-status.sh admin development --detailed  # Detailed admin status
+    Show admin GraphQL container status:
+    ./docker-status.sh admin
+
+    Show multiple container status:
+    ./docker-status.sh admin operator
+
+    Show all GraphQL container status:
+    ./docker-status.sh all
+    ./docker-status.sh
 
 NOTES:
-    - Only applies to development environment (uses Docker)
-    - Production uses Hasura Cloud (no local containers)
-    - Tests both container and GraphQL service health
+    - Uses unified docker-compose.yml stack
+    - Shows detailed container information including health status
+    - Part of shared GraphQL API management system
 EOF
 }
 
-# Parse command line arguments
-TIER=""
-ENVIRONMENT=""
-DETAILED=false
-SHOW_LOGS=false
+# ================================================================================
+# Parse Arguments
+# ================================================================================
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-        --detailed)
-            DETAILED=true
-            shift
-            ;;
-        --logs)
-            SHOW_LOGS=true
-            shift
-            ;;
-        *)
-            if [[ -z "$TIER" ]]; then
-                TIER="$1"
-            elif [[ -z "$ENVIRONMENT" ]]; then
-                ENVIRONMENT="$1"
-            else
-                log_error "Unknown argument: $1"
-                show_help
-                exit 1
-            fi
-            shift
-            ;;
-    esac
-done
-
-# Validate arguments
-if [[ -z "$TIER" || -z "$ENVIRONMENT" ]]; then
-    log_error "Both tier and environment arguments are required"
+if [[ "$#" -gt 0 ]] && ([[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]); then
     show_help
-    exit 1
-fi
-
-# Configure tier and validate
-if ! configure_tier "$TIER"; then
-    die "Failed to configure tier: $TIER"
-fi
-
-validate_environment "$ENVIRONMENT"
-
-# Load tier-specific configuration
-if ! load_tier_config "$TIER" "$ENVIRONMENT"; then
-    log_warning "Could not load tier configuration, using defaults"
-fi
-
-# Check prerequisites
-check_prerequisites
-
-# Discover tier repository
-if ! discover_tier_repository "$TIER"; then
-    die "Could not find tier repository"
-fi
-
-section_header "📊 SHARED GRAPHQL DOCKER STATUS - $(echo $TIER | tr '[:lower:]' '[:upper:]') TIER"
-log_info "Tier: $TIER"
-log_info "Environment: $ENVIRONMENT"
-log_info "Container: $GRAPHQL_TIER_CONTAINER"
-log_info "Expected Port: $GRAPHQL_TIER_PORT"
-
-# Production check - no Docker containers in production
-if [[ "$ENVIRONMENT" == "production" ]]; then
-    log_info "Production environment uses Hasura Cloud, not Docker containers"
-    log_info "Use compare-environments.sh to check production status"
     exit 0
 fi
 
-# Start timing
-start_timer
-
-# Check if Docker is running
-if ! check_docker_running; then
-    log_error "Docker is not running"
-    log_info "Please start Docker Desktop to check container status"
-    exit 1
+# If no arguments provided, default to "all"
+if [[ $# -eq 0 ]]; then
+    TIERS=("all")
+else
+    TIERS=("$@")
 fi
 
-# Get container status
-container_status=$(get_container_status "$GRAPHQL_TIER_CONTAINER")
-log_progress "Checking container status..."
+# ================================================================================
+# Main Logic
+# ================================================================================
 
-case "$container_status" in
-    "running")
-        log_success "Container '$GRAPHQL_TIER_CONTAINER' is running"
+main() {
+    section_header "GraphQL Docker Container Status"
+
+    # Check if docker-compose.yml exists
+    if [[ ! -f "$PARENT_DIR/docker-compose.yml" ]]; then
+        log_error "docker-compose.yml not found in $PARENT_DIR"
+        exit 1
+    fi
+
+    # Change to parent directory for docker-compose
+    cd "$PARENT_DIR"
+
+    local services_to_check=()
+
+    # Process tier arguments
+    for tier in "${TIERS[@]}"; do
+        case "$tier" in
+            admin)
+                services_to_check+=(admin-graphql-server)
+                ;;
+            operator)
+                services_to_check+=(operator-graphql-server)
+                ;;
+            member)
+                services_to_check+=(member-graphql-server)
+                ;;
+            all)
+                services_to_check=(admin-graphql-server operator-graphql-server member-graphql-server)
+                break
+                ;;
+            *)
+                log_error "Invalid tier: $tier (must be admin, operator, member, or all)"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Show general docker-compose status
+    log_progress "Docker Compose Stack Status:"
+    if docker-compose ps; then
+        echo ""
+    else
+        log_warning "Failed to get docker-compose status"
+    fi
+
+    # Show detailed status for specific services
+    if [[ ${#services_to_check[@]} -gt 0 ]]; then
+        log_progress "Detailed Service Status:"
         
-        # Get detailed container information
-        if command -v docker >/dev/null 2>&1; then
-            # Get port mappings
-            local port_mapping=$(docker port "$GRAPHQL_TIER_CONTAINER" 8080 2>/dev/null)
-            if [[ -n "$port_mapping" ]]; then
-                log_detail "Port mapping: 8080 → $port_mapping"
+        for service in "${services_to_check[@]}"; do
+            echo ""
+            log_info "=== $service ==="
+            
+            # Check if container exists
+            if docker-compose ps -q "$service" >/dev/null 2>&1; then
+                # Get container status
+                local status=$(docker-compose ps "$service" 2>/dev/null | tail -n +3 | awk '{print $4}' || echo "unknown")
+                local container_id=$(docker-compose ps -q "$service" 2>/dev/null || echo "")
+                
+                if [[ -n "$container_id" ]]; then
+                    # Service is defined and may be running
+                    if docker inspect "$container_id" >/dev/null 2>&1; then
+                        local running=$(docker inspect -f '{{.State.Running}}' "$container_id" 2>/dev/null || echo "false")
+                        local health=$(docker inspect -f '{{.State.Health.Status}}' "$container_id" 2>/dev/null || echo "no_health_check")
+                        local created=$(docker inspect -f '{{.Created}}' "$container_id" 2>/dev/null || echo "unknown")
+                        local image=$(docker inspect -f '{{.Config.Image}}' "$container_id" 2>/dev/null || echo "unknown")
+                        
+                        if [[ "$running" == "true" ]]; then
+                            log_success "Status: Running"
+                        else
+                            log_warning "Status: Stopped"
+                        fi
+                        
+                        case "$health" in
+                            healthy)
+                                log_success "Health: Healthy"
+                                ;;
+                            unhealthy)
+                                log_error "Health: Unhealthy"
+                                ;;
+                            starting)
+                                log_warning "Health: Starting"
+                                ;;
+                            no_health_check)
+                                log_info "Health: No health check configured"
+                                ;;
+                            *)
+                                log_info "Health: $health"
+                                ;;
+                        esac
+                        
+                        log_detail "Image: $image"
+                        log_detail "Created: $created"
+                        
+                        # Show port mappings
+                        local ports=$(docker port "$container_id" 2>/dev/null || echo "")
+                        if [[ -n "$ports" ]]; then
+                            log_detail "Ports: $ports"
+                        fi
+                        
+                        # Show recent logs (last 5 lines)
+                        log_info "Recent logs:"
+                        docker logs --tail 5 "$container_id" 2>/dev/null | sed 's/^/    /' || log_warning "Could not retrieve logs"
+                        
+                    else
+                        log_error "Container exists in compose but not in Docker"
+                    fi
+                else
+                    log_warning "$service: Not running"
+                fi
             else
-                log_warning "No port mapping found for port 8080"
+                log_error "$service: Service not found in docker-compose"
             fi
-            
-            # Get container uptime
-            local created=$(docker inspect "$GRAPHQL_TIER_CONTAINER" --format='{{.Created}}' 2>/dev/null)
-            if [[ -n "$created" ]]; then
-                log_detail "Container created: $created"
-            fi
-            
-            # Get container image
-            local image=$(docker inspect "$GRAPHQL_TIER_CONTAINER" --format='{{.Config.Image}}' 2>/dev/null)
-            if [[ -n "$image" ]]; then
-                log_detail "Container image: $image"
-            fi
-        fi
-        
-        # Test GraphQL service connectivity
-        log_progress "Testing GraphQL service connectivity..."
-        if test_graphql_connection "$TIER" "$ENVIRONMENT"; then
-            log_success "GraphQL service is accessible and healthy"
-        else
-            log_warning "Container is running but GraphQL service is not responsive"
-            log_detail "Service may still be starting up"
-        fi
-        ;;
-        
-    "stopped")
-        log_warning "Container '$GRAPHQL_TIER_CONTAINER' exists but is stopped"
-        log_info "Use docker-start.sh to start the container"
-        ;;
-        
-    "not_exists")
-        log_error "Container '$GRAPHQL_TIER_CONTAINER' does not exist"
-        log_info "Use docker-start.sh to create and start the container"
-        ;;
-        
-    *)
-        log_warning "Unknown container status: $container_status"
-        ;;
-esac
-
-# Detailed information if requested
-if [[ "$DETAILED" == "true" && "$container_status" == "running" ]]; then
-    log_progress "Gathering detailed container information..."
-    
-    cd "$TIER_REPOSITORY_PATH"
-    
-    # docker-compose status
-    log_detail "Docker Compose Status:"
-    if docker-compose ps 2>/dev/null; then
-        echo ""
-    else
-        log_warning "Could not get docker-compose status"
+        done
     fi
-    
-    # Container stats
+
+    # Show resource usage
+    echo ""
+    log_progress "Resource Usage:"
     if command -v docker >/dev/null 2>&1; then
-        log_detail "Container Resource Usage:"
-        docker stats "$GRAPHQL_TIER_CONTAINER" --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" 2>/dev/null || log_warning "Could not get container stats"
-    fi
-    
-    cd "$SCRIPT_DIR/.."
-fi
-
-# Show logs if requested
-if [[ "$SHOW_LOGS" == "true" && "$container_status" == "running" ]]; then
-    log_progress "Showing recent container logs..."
-    
-    cd "$TIER_REPOSITORY_PATH"
-    
-    if docker-compose logs --tail=20 "$GRAPHQL_TIER_CONTAINER" 2>/dev/null; then
-        echo ""
-    elif docker logs --tail=20 "$GRAPHQL_TIER_CONTAINER" 2>/dev/null; then
-        echo ""
-    else
-        log_warning "Could not retrieve container logs"
-    fi
-    
-    cd "$SCRIPT_DIR/.."
-fi
-
-# Summary based on status
-case "$container_status" in
-    "running")
-        if test_graphql_connection "$TIER" "$ENVIRONMENT" >/dev/null 2>&1; then
-            log_success "✅ Service Status: HEALTHY"
-            log_info "GraphQL Endpoint: http://localhost:$GRAPHQL_TIER_PORT"
-            log_info "GraphQL Console: http://localhost:$GRAPHQL_TIER_PORT/console"
+        if docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" 2>/dev/null | grep -E "(admin-graphql|operator-graphql|member-graphql)" || true; then
+            echo ""
         else
-            log_warning "⚠️  Service Status: CONTAINER RUNNING, SERVICE NOT READY"
-            log_info "Container may still be initializing"
+            log_info "No GraphQL containers currently consuming resources"
         fi
-        ;;
-    "stopped")
-        log_warning "🛑 Service Status: STOPPED"
-        log_info "Run: ./docker-start.sh $TIER $ENVIRONMENT"
-        ;;
-    "not_exists")
-        log_error "❌ Service Status: NOT CREATED"
-        log_info "Run: ./docker-start.sh $TIER $ENVIRONMENT"
-        ;;
-    *)
-        log_warning "❓ Service Status: UNKNOWN"
-        ;;
-esac
+    else
+        log_warning "Docker command not available for resource monitoring"
+    fi
 
-# Success summary
-print_operation_summary "Docker Status Check" "$TIER" "$ENVIRONMENT"
-# Return success exit code
-exit 0
+    # Show network information
+    echo ""
+    log_progress "Network Information:"
+    if docker network ls | grep -q "shared_graphql_network"; then
+        log_success "shared_graphql_network: Available"
+        
+        # Show connected containers
+        local connected=$(docker network inspect shared_graphql_network --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null || echo "")
+        if [[ -n "$connected" ]]; then
+            log_detail "Connected containers: $connected"
+        fi
+    else
+        log_warning "shared_graphql_network: Not found"
+    fi
+
+    # Summary
+    echo ""
+    print_operation_summary "Docker Status" "${TIERS[*]}" "development"
+}
+
+# Set trap for error handling
+trap 'log_error "Script failed on line $LINENO"' ERR
+
+# Run main function
+main
