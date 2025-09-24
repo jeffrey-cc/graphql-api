@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Shared GraphQL API** repository - a unified command framework that manages GraphQL operations across three tiers (admin, operator, member) in the Community Connect Tech multi-tenant system. It provides a complete deterministic pipeline for GraphQL API setup, testing, and validation using pure database introspection and GraphQL-only data operations.
+This is the **GraphQL API** repository - a unified command framework that manages GraphQL operations across three tiers (admin, operator, member) in the Community Connect Tech multi-tenant system. It provides a complete deterministic pipeline for GraphQL API setup, testing, and validation using pure database introspection and GraphQL-only data operations.
 
 ## Core Philosophy
 
@@ -56,7 +56,7 @@ The system implements a complete deterministic workflow that either succeeds ent
 | member   | 8103         | member-graphql-server   | 7103           | CCTech2024Member    |
 
 ### Integration with Child Repositories
-Child repositories (`../graphql-admin-api/`, `../graphql-operator-api/`, `../graphql-member-api/`) contain:
+Child repositories (`./graphql-admin-api/`, `./graphql-operator-api/`, `./graphql-member-api/`) contain:
 - `test-data/` - CSV files copied from database system for GraphQL testing
 - `CLAUDE.md` - Tier-specific business context
 
@@ -88,7 +88,7 @@ Child repositories (`../graphql-admin-api/`, `../graphql-operator-api/`, `../gra
 
 ## Directory Structure
 ```
-shared-graphql-api/
+graphql-api/
 ├── commands/
 │   ├── complete-pipeline.sh      # Full deterministic pipeline
 │   ├── full-rebuild-dev.sh       # Development container rebuild
@@ -103,9 +103,9 @@ shared-graphql-api/
 └── CLAUDE.md                     # This file
 
 Child repositories (gitignored):
-../graphql-admin-api/test-data/    # Admin CSV test data
-../graphql-operator-api/test-data/ # Operator CSV test data  
-../graphql-member-api/test-data/   # Member CSV test data
+./graphql-admin-api/test-data/    # Admin CSV test data
+./graphql-operator-api/test-data/ # Operator CSV test data
+./graphql-member-api/test-data/   # Member CSV test data
 ```
 
 ## Development Workflow

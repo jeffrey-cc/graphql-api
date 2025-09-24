@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Exhaustive test of all commands in shared-graphql-api
+# Exhaustive test of all commands in graphql-api
 set -e
 
-cd /Users/cc/Desktop/v3/shared-graphql-api
+cd /Users/cc/Desktop/v3/graphql-api
 
 echo "====================================="
 echo "EXHAUSTIVE COMMAND TESTING"

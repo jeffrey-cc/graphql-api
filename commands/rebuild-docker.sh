@@ -182,7 +182,7 @@ fi
 
 # Remove tier-specific volume
 log_progress "Removing tier-specific volume..."
-VOLUME_NAME="shared-graphql-api_${TIER}_graphql_metadata"
+VOLUME_NAME="graphql-api_${TIER}_graphql_metadata"
 docker volume rm "$VOLUME_NAME" 2>/dev/null || true
 
 # Remove any dangling volumes
