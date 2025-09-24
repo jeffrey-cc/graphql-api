@@ -111,7 +111,7 @@ Child repositories (gitignored):
 ## Development Workflow
 
 ### Making Changes
-1. **Database Schema Changes**: Work in `../shared-database-sql/` 
+1. **Database Schema Changes**: Work in `../database-sql/` 
 2. **GraphQL Updates**: Run introspection-based tracking to auto-discover changes
 3. **Testing**: Use GraphQL-only test data workflow
 4. **No Manual Configuration**: System discovers everything via introspection
@@ -136,7 +136,7 @@ The pipeline is designed to be deterministic:
 ## Integration Points
 
 ### With Database System
-- Connects to databases populated by `../shared-database-sql/`
+- Connects to databases populated by `../database-sql/`
 - Discovers schema via introspection, never reads database repo files
 - Uses CSV data copied to child GraphQL repos
 
