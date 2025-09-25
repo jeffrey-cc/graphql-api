@@ -62,28 +62,128 @@ Child repositories (`./admin-graphql-api/`, `./operator-graphql-api/`, `./member
 
 **Important**: Child repositories are NOT tracked in shared Git history (gitignored).
 
-## Key Commands
+## Available Commands
 
-### Complete Pipeline
+### Primary Commands
+
+#### `complete-pipeline.sh <tier> <environment>`
+Runs the full deterministic pipeline end-to-end. This is the main command for setting up GraphQL.
+- Rebuilds containers (development) or preserves them (production)
+- Tracks all tables via introspection
+- Auto-discovers and creates relationships
+- Runs complete test workflow
+- Example: `./commands/complete-pipeline.sh admin development`
+
+#### `fast-refresh.sh <tier> <environment>`
+Quick refresh when database schema changes. Use this first before rebuild.
+- Preserves Docker containers
+- Re-introspects database schema
+- Updates GraphQL tracking
+- Maintains existing data
+- Example: `./commands/fast-refresh.sh operator development`
+
+#### `rebuild-docker.sh <tier> <environment>`
+Complete container rebuild (development only). Use when fast-refresh fails.
+- Destroys existing containers and volumes
+- Creates fresh containers from scratch
+- Re-applies all configurations
+- Example: `./commands/rebuild-docker.sh member development`
+
+### Deployment & Setup Commands
+
+#### `deploy-graphql.sh <tier> <environment>`
+Full GraphQL deployment with introspection and relationship tracking.
+- Connects to database
+- Tracks all tables and views
+- Creates relationships
+- Example: `./commands/deploy-graphql.sh admin production`
+
+#### `track-all-tables.sh <tier> <environment>`
+Discovers and tracks all database objects via introspection.
+- Queries information_schema
+- Tracks tables, views, enums, functions
+- No manual configuration needed
+- Example: `./commands/track-all-tables.sh operator development`
+
+### Docker Management Commands
+
+#### `docker-start.sh <tier> <environment>`
+Starts GraphQL Docker containers.
+- Example: `./commands/docker-start.sh admin development`
+
+#### `docker-stop.sh <tier> <environment>`
+Stops GraphQL Docker containers.
+- Example: `./commands/docker-stop.sh member development`
+
+#### `docker-status.sh <tier> <environment>`
+Shows Docker container status for specific tier/environment.
+- Example: `./commands/docker-status.sh operator production`
+
+### Verification Commands
+
+#### `verify-complete-setup.sh <tier> <environment>`
+Comprehensive validation of entire GraphQL setup.
+- Checks container health
+- Validates table tracking
+- Verifies relationships
+- Example: `./commands/verify-complete-setup.sh admin development`
+
+#### `verify-tables-tracked.sh <tier> <environment>`
+Validates all database tables are properly tracked in GraphQL.
+- Example: `./commands/verify-tables-tracked.sh operator development`
+
+#### `compare-environments.sh <tier>`
+Compares development vs production configurations.
+- Shows table count differences
+- Compares relationship counts
+- Identifies environment discrepancies
+- Example: `./commands/compare-environments.sh admin`
+
+### Testing Commands
+
+#### `test-graphql.sh <tier> <environment>`
+Complete GraphQL test workflow.
+- Purges all data via GraphQL mutations
+- Loads test data from CSV files
+- Verifies record counts
+- Validates GraphQL operations
+- Example: `./testing/test-graphql.sh member development`
+
+#### `load-test-data.sh <tier> <environment>`
+Loads test data via GraphQL mutations only.
+- Reads CSV files from child repos
+- Uses GraphQL insert mutations
+- Example: `./testing/load-test-data.sh admin development`
+
+#### `purge-test-data.sh <tier> <environment>`
+Removes all data via GraphQL delete mutations.
+- Cleans all tables
+- Maintains schema/structure
+- Example: `./testing/purge-test-data.sh operator development`
+
+#### `test-connection.sh <tier> <environment>`
+Tests database and GraphQL connectivity.
+- Example: `./testing/test-connection.sh member production`
+
+### Common Usage Patterns
+
 ```bash
-# Run full deterministic pipeline
-./commands/complete-pipeline.sh admin development
-./commands/complete-pipeline.sh operator production
-```
+# When database schema changes:
+./commands/fast-refresh.sh admin development  # Try this first
+# If fast-refresh fails:
+./commands/rebuild-docker.sh admin development  # Full rebuild
 
-### Individual Operations
-```bash
-# Container rebuild (development only)
-./commands/full-rebuild-dev.sh
+# Setting up fresh environment:
+./commands/complete-pipeline.sh operator development
 
-# Database introspection and table tracking
-./commands/track-all-tables.sh admin development
+# Daily development workflow:
+./commands/docker-start.sh member development
+# ... work on code ...
+./commands/docker-stop.sh member development
 
-# Relationship discovery and tracking  
-./commands/track-relationships-smart.sh operator development
-
-# Test data workflow
-./testing/test-graphql.sh member development
+# Validating setup:
+./commands/verify-complete-setup.sh admin development
+./commands/compare-environments.sh admin
 ```
 
 ## Directory Structure
