@@ -1,9 +1,23 @@
 #!/bin/bash
 
 # Exhaustive test of all commands in graphql-api
+#
+# This script tests the complete GraphQL API management system which provides:
+# - rebuild-docker.sh: Completely rebuilds Docker containers (development only, destroys and recreates)
+# - fast-refresh.sh: Quick refresh of GraphQL schema when database changes (preserves containers)
+# - deploy-graphql.sh: Full deployment pipeline including introspection and relationship tracking
+# - track-all-tables.sh: Discovers and tracks all database tables via introspection
+# - track-relationships.sh: Auto-discovers and creates foreign key relationships
+# - docker-* commands: Container management (start, stop, status, rebuild)
+# - verify-* commands: Validation of setup completeness
+# - compare-environments.sh: Compares dev vs production configurations
+#
+# The system follows a deterministic pipeline that either succeeds completely or fails with clear errors.
+# When database changes occur, use fast-refresh.sh first; if that fails, use rebuild-docker.sh.
+
 set -e
 
-cd /Users/cc/Desktop/v3/graphql-api
+cd /Users/community/Desktop/v3/graphql-api
 
 echo "====================================="
 echo "EXHAUSTIVE COMMAND TESTING"
@@ -85,6 +99,7 @@ test_no_params_command() {
 
 echo "========================================="
 echo "1. TESTING compare-environments.sh"
+echo "   Compares dev vs production table/relationship counts"
 echo "========================================="
 for tier in $TIERS; do
     test_tier_only_command "compare-environments.sh" "$tier" || true
@@ -93,12 +108,14 @@ echo ""
 
 echo "========================================="
 echo "2. TESTING status-all.sh"
+echo "   Shows status of all GraphQL containers"
 echo "========================================="
 test_no_params_command "status-all.sh" || true
 echo ""
 
 echo "========================================="
 echo "3. TESTING docker-status.sh"
+echo "   Checks Docker container status for specific tier/env"
 echo "========================================="
 for tier in $TIERS; do
     for env in $ENVIRONMENTS; do
@@ -109,6 +126,7 @@ echo ""
 
 echo "========================================="
 echo "4. TESTING test-health.sh"
+echo "   Verifies GraphQL endpoint health"
 echo "========================================="
 for tier in $TIERS; do
     for env in $ENVIRONMENTS; do
@@ -119,6 +137,7 @@ echo ""
 
 echo "========================================="
 echo "5. TESTING fast-refresh.sh"
+echo "   Quick refresh when DB changes (preserves containers)"
 echo "========================================="
 for tier in $TIERS; do
     for env in $ENVIRONMENTS; do
@@ -129,6 +148,7 @@ echo ""
 
 echo "========================================="
 echo "6. TESTING verify-tables-tracked.sh"
+echo "   Validates all database tables are tracked"
 echo "========================================="
 for tier in $TIERS; do
     for env in $ENVIRONMENTS; do
@@ -139,6 +159,7 @@ echo ""
 
 echo "========================================="
 echo "7. TESTING verify-complete-setup.sh"
+echo "   Comprehensive validation of entire setup"
 echo "========================================="
 for tier in $TIERS; do
     for env in $ENVIRONMENTS; do
@@ -149,6 +170,7 @@ echo ""
 
 echo "========================================="
 echo "8. TESTING track-all-tables.sh"
+echo "   Introspection-based table discovery and tracking"
 echo "========================================="
 for tier in $TIERS; do
     test_command "track-all-tables.sh" "$tier" "development" || true
@@ -157,6 +179,7 @@ echo ""
 
 echo "========================================="
 echo "9. TESTING track-relationships.sh"
+echo "   Auto-discovers and creates foreign key relationships"
 echo "========================================="
 for tier in $TIERS; do
     test_command "track-relationships.sh" "$tier" "development" || true
@@ -165,6 +188,7 @@ echo ""
 
 echo "========================================="
 echo "10. TESTING restart-graphql.sh"
+echo "    Restarts GraphQL container without losing data"
 echo "========================================="
 for tier in $TIERS; do
     test_command "restart-graphql.sh" "$tier" "development" || true
@@ -173,6 +197,7 @@ echo ""
 
 echo "========================================="
 echo "11. TESTING docker-start.sh"
+echo "    Starts GraphQL Docker containers"
 echo "========================================="
 for tier in $TIERS; do
     test_command "docker-start.sh" "$tier" "development" || true
@@ -181,6 +206,7 @@ echo ""
 
 echo "========================================="
 echo "12. TESTING docker-stop.sh"
+echo "    Stops GraphQL Docker containers"
 echo "========================================="
 for tier in $TIERS; do
     test_command "docker-stop.sh" "$tier" "development" || true
@@ -189,6 +215,7 @@ echo ""
 
 echo "========================================="
 echo "13. TESTING docker-start.sh (restart after stop)"
+echo "    Verifies containers restart properly"
 echo "========================================="
 for tier in $TIERS; do
     test_command "docker-start.sh" "$tier" "development" || true
@@ -197,6 +224,7 @@ echo ""
 
 echo "========================================="
 echo "14. TESTING rebuild-docker.sh"
+echo "    Full container rebuild (dev only, destroys and recreates)"
 echo "========================================="
 for tier in $TIERS; do
     test_command "rebuild-docker.sh" "$tier" "development" || true
@@ -205,6 +233,7 @@ echo ""
 
 echo "========================================="
 echo "15. TESTING deploy-graphql.sh"
+echo "    Complete deployment pipeline with introspection"
 echo "========================================="
 for tier in $TIERS; do
     test_command "deploy-graphql.sh" "$tier" "development" || true
