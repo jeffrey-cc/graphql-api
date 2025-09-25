@@ -361,7 +361,7 @@ log_success "Purged $purge_count records from database"
 log_detail "Loading test data from CSV files..."
 log_to_file "STEP 4.2: Loading test data from CSV files"
 
-TEST_DATA_PATH="./graphql-$TIER-api/test-data"
+TEST_DATA_PATH="./$TIER-graphql-api/test-data"
 TEMP_LOAD_FILE=$(mktemp)
 echo "0" > "$TEMP_LOAD_FILE"
 csv_line_count=0

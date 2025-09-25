@@ -111,7 +111,7 @@ log_info "Database: $DB_TIER_DATABASE at localhost:$DB_TIER_PORT"
 start_timer
 
 # Check that test-data directory exists
-TIER_REPO_PATH="./graphql-$TIER-api"
+TIER_REPO_PATH="./$TIER-graphql-api"
 TEST_DATA_PATH="$TIER_REPO_PATH/test-data"
 
 if [[ ! -d "$TEST_DATA_PATH" ]]; then
