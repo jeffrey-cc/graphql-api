@@ -1,7 +1,7 @@
 # Ignore child GraphQL API repositories
-graphql-admin-api/
-graphql-member-api/
-graphql-operator-api/
+admin-graphql-api/
+member-graphql-api/
+operator-graphql-api/
 
 # OS files
 .DS_Store

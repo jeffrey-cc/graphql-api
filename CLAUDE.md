@@ -56,7 +56,7 @@ The system implements a complete deterministic workflow that either succeeds ent
 | member   | 8103         | member-graphql-server   | 7103           | CCTech2024Member    |
 
 ### Integration with Child Repositories
-Child repositories (`./graphql-admin-api/`, `./graphql-operator-api/`, `./graphql-member-api/`) contain:
+Child repositories (`./admin-graphql-api/`, `./operator-graphql-api/`, `./member-graphql-api/`) contain:
 - `test-data/` - CSV files copied from database system for GraphQL testing
 - `CLAUDE.md` - Tier-specific business context
 
@@ -103,9 +103,9 @@ graphql-api/
 └── CLAUDE.md                     # This file
 
 Child repositories (gitignored):
-./graphql-admin-api/test-data/    # Admin CSV test data
-./graphql-operator-api/test-data/ # Operator CSV test data
-./graphql-member-api/test-data/   # Member CSV test data
+./admin-graphql-api/test-data/    # Admin CSV test data
+./operator-graphql-api/test-data/ # Operator CSV test data
+./member-graphql-api/test-data/   # Member CSV test data
 ```
 
 ## Development Workflow
