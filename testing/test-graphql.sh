@@ -251,17 +251,32 @@ total_relationships=0
 schemas_with_relationships=0
 
 for schema in "${schemas_to_check[@]}"; do
+    # Show progress
+    log_detail "  Verifying schema '$schema'..."
+
     # Use the verify-schema command to check relationships
-    verify_output=$("$TEST_SCRIPT_DIR/../commands/verify-schema.sh" "$TIER" "$ENVIRONMENT" "$schema" 2>&1)
+    # Run with timeout and capture output to temp file to avoid buffering issues
+    temp_output=$(mktemp)
+    if "$TEST_SCRIPT_DIR/../commands/verify-schema.sh" "$TIER" "$ENVIRONMENT" "$schema" > "$temp_output" 2>&1; then
+        # Extract relationship count from output
+        rel_count=$(grep "Total Relationships:" "$temp_output" | awk '{print $3}')
 
-    # Extract relationship count from output
-    rel_count=$(echo "$verify_output" | grep "Total Relationships:" | awk '{print $3}')
-
-    if [[ -n "$rel_count" ]] && [[ "$rel_count" -gt 0 ]]; then
-        ((total_relationships += rel_count))
-        ((schemas_with_relationships++))
-        log_detail "  Schema '$schema': $rel_count relationships"
+        if [[ -n "$rel_count" ]] && [[ "$rel_count" -gt 0 ]]; then
+            ((total_relationships += rel_count))
+            ((schemas_with_relationships++))
+            log_detail "    ✓ Schema '$schema': $rel_count relationships"
+        else
+            log_detail "    - Schema '$schema': 0 relationships"
+        fi
+    else
+        log_warning "    Failed to verify schema '$schema'"
     fi
+
+    # Clean up temp file
+    rm -f "$temp_output"
+
+    # Small delay between schema checks to avoid overwhelming the API
+    sleep 0.5
 done
 
 if [[ $total_relationships -gt 0 ]]; then
