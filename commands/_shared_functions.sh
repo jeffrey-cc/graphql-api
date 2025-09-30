@@ -147,12 +147,12 @@ log_success() {
 
 log_warning() {
     echo -e "${YELLOW}⚠️  WARNING${NC}: $1" >&2
-    ((COMMAND_WARNINGS++))
+    ((COMMAND_WARNINGS++)) || true
 }
 
 log_error() {
     echo -e "${RED}❌ ERROR${NC}: $1" >&2
-    ((COMMAND_ERRORS++))
+    ((COMMAND_ERRORS++)) || true
 }
 
 log_section() {
