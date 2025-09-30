@@ -25,7 +25,10 @@ services:
       
       # Performance
       HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
-      
+
+      # Session Variables - Pass to PostgreSQL for audit triggers
+      HASURA_GRAPHQL_PG_CONNECTIONS_PREPARE_ENABLED: "false"
+
     ports:
       - "8101:8080"
     healthcheck:
@@ -63,7 +66,10 @@ services:
       
       # Performance
       HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
-      
+
+      # Session Variables - Pass to PostgreSQL for audit triggers
+      HASURA_GRAPHQL_PG_CONNECTIONS_PREPARE_ENABLED: "false"
+
     ports:
       - "8102:8080"
     healthcheck:
@@ -101,7 +107,10 @@ services:
       
       # Performance
       HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "false"
-      
+
+      # Session Variables - Pass to PostgreSQL for audit triggers
+      HASURA_GRAPHQL_PG_CONNECTIONS_PREPARE_ENABLED: "false"
+
     ports:
       - "8103:8080"
     healthcheck:
