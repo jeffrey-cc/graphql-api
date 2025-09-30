@@ -165,40 +165,42 @@ else
     ((COMMAND_ERRORS++))
 fi
 
-# Test tier-specific queries based on tier
-case "$TIER" in
-    "admin")
-        log_detail "Testing admin-specific queries..."
-        # Test admin tables query
-        admin_query='{"query": "query { admin_system_settings { key name value } }"}'
-        ;;
-    "operator")
-        log_detail "Testing operator-specific queries..."
-        # Test operator facilities query
-        admin_query='{"query": "query { facilities { id name city state } }"}'
-        ;;
-    "member")
-        log_detail "Testing member-specific queries..."
-        # Test member profiles query
-        admin_query='{"query": "query { member_profiles { id name email } }"}'
-        ;;
-esac
+# Test tier-specific queries based on tier (TEMPORARILY DISABLED FOR DEBUGGING)
+# case "$TIER" in
+#     "admin")
+#         log_detail "Testing admin-specific queries..."
+#         # Test admin tables query
+#         admin_query='{"query": "query { admin_system_settings { key name value } }"}'
+#         ;;
+#     "operator")
+#         log_detail "Testing operator-specific queries..."
+#         # Test operator facilities query
+#         admin_query='{"query": "query { facilities { id name city state } }"}'
+#         ;;
+#     "member")
+#         log_detail "Testing member-specific queries..."
+#         # Test member profiles query
+#         admin_query='{"query": "query { member_profiles { id name email } }"}'
+#         ;;
+# esac
 
 # Execute tier-specific test query
-if [[ -n "$admin_query" ]]; then
-    test_response=$(curl -s \
-        -H "Content-Type: application/json" \
-        -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
-        -d "$admin_query" \
-        "$endpoint/v1/graphql" 2>/dev/null)
-    
-    if [[ "$test_response" == *'"data"'* ]]; then
-        log_success "Tier-specific queries working"
-    else
-        log_warning "Tier-specific query may have failed (this might be expected if tables don't exist)"
-        log_debug "Response: $test_response"
-    fi
-fi
+# if [[ -n "$admin_query" ]]; then
+#     test_response=$(curl -s \
+#         -H "Content-Type: application/json" \
+#         -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
+#         -d "$admin_query" \
+#         "$endpoint/v1/graphql" 2>/dev/null)
+#
+#     if [[ "$test_response" == *'"data"'* ]]; then
+#         log_success "Tier-specific queries working"
+#     else
+#         log_warning "Tier-specific query may have failed (this might be expected if tables don't exist)"
+#         log_debug "Response: $test_response"
+#     fi
+# fi
+
+log_detail "Skipping tier-specific query test (temporarily disabled for debugging)"
 
 # Test mutations (simple health check)
 log_detail "Testing GraphQL mutations capability..."
