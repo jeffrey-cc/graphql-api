@@ -149,10 +149,10 @@ log_progress "Step 3/4: VERIFY - Running GraphQL verification tests..."
 
 # Test basic GraphQL introspection
 log_detail "Testing GraphQL introspection..."
-local endpoint="http://localhost:$GRAPHQL_TIER_PORT"
-local introspection_query='{"query": "query { __schema { queryType { name } mutationType { name } subscriptionType { name } } }"}'
+endpoint="http://localhost:$GRAPHQL_TIER_PORT"
+introspection_query='{"query": "query { __schema { queryType { name } mutationType { name } subscriptionType { name } } }"}'
 
-local response=$(curl -s \
+response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$introspection_query" \
@@ -170,23 +170,23 @@ case "$TIER" in
     "admin")
         log_detail "Testing admin-specific queries..."
         # Test admin tables query
-        local admin_query='{"query": "query { admin_system_settings { key name value } }"}'
+        admin_query='{"query": "query { admin_system_settings { key name value } }"}'
         ;;
     "operator")
         log_detail "Testing operator-specific queries..."
         # Test operator facilities query
-        local admin_query='{"query": "query { facilities { id name city state } }"}'
+        admin_query='{"query": "query { facilities { id name city state } }"}'
         ;;
     "member")
         log_detail "Testing member-specific queries..."
         # Test member profiles query
-        local admin_query='{"query": "query { member_profiles { id name email } }"}'
+        admin_query='{"query": "query { member_profiles { id name email } }"}'
         ;;
 esac
 
 # Execute tier-specific test query
 if [[ -n "$admin_query" ]]; then
-    local test_response=$(curl -s \
+    test_response=$(curl -s \
         -H "Content-Type: application/json" \
         -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
         -d "$admin_query" \
@@ -202,8 +202,8 @@ fi
 
 # Test mutations (simple health check)
 log_detail "Testing GraphQL mutations capability..."
-local mutation_test='{"query": "mutation { __typename }"}'
-local mutation_response=$(curl -s \
+mutation_test='{"query": "mutation { __typename }"}'
+mutation_response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$mutation_test" \
@@ -217,8 +217,8 @@ fi
 
 # Test subscriptions capability
 log_detail "Testing GraphQL subscriptions capability..."
-local subscription_test='{"query": "subscription { __typename }"}'
-local subscription_response=$(curl -s \
+subscription_test='{"query": "subscription { __typename }"}'
+subscription_response=$(curl -s \
     -H "Content-Type: application/json" \
     -H "x-hasura-admin-secret: $GRAPHQL_TIER_ADMIN_SECRET" \
     -d "$subscription_test" \
@@ -234,7 +234,7 @@ fi
 log_detail "Testing GraphQL relationships for all schemas..."
 
 # Define schemas to check based on tier
-local schemas_to_check=()
+schemas_to_check=()
 case "$TIER" in
     "admin")
         schemas_to_check=("admin" "operators" "system" "financial" "sales" "support" "compliance" "integration")
@@ -247,15 +247,15 @@ case "$TIER" in
         ;;
 esac
 
-local total_relationships=0
-local schemas_with_relationships=0
+total_relationships=0
+schemas_with_relationships=0
 
 for schema in "${schemas_to_check[@]}"; do
     # Use the verify-schema command to check relationships
-    local verify_output=$("$SCRIPT_DIR/../commands/verify-schema.sh" "$TIER" "$ENVIRONMENT" "$schema" 2>&1)
+    verify_output=$("$TEST_SCRIPT_DIR/../commands/verify-schema.sh" "$TIER" "$ENVIRONMENT" "$schema" 2>&1)
 
     # Extract relationship count from output
-    local rel_count=$(echo "$verify_output" | grep "Total Relationships:" | awk '{print $3}')
+    rel_count=$(echo "$verify_output" | grep "Total Relationships:" | awk '{print $3}')
 
     if [[ -n "$rel_count" ]] && [[ "$rel_count" -gt 0 ]]; then
         ((total_relationships += rel_count))

@@ -136,7 +136,7 @@ else
     "$SHARED_DB_PURGE" "$TIER" "$ENVIRONMENT"
 fi
 
-local purge_exit_code=$?
+purge_exit_code=$?
 
 if [[ $purge_exit_code -eq 0 ]]; then
     log_success "Data purge completed successfully"
