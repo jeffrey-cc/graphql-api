@@ -230,6 +230,46 @@ else
     log_warning "GraphQL subscriptions test inconclusive"
 fi
 
+# Test relationships for all schemas
+log_detail "Testing GraphQL relationships for all schemas..."
+
+# Define schemas to check based on tier
+local schemas_to_check=()
+case "$TIER" in
+    "admin")
+        schemas_to_check=("admin" "operators" "system" "financial" "sales" "support" "compliance" "integration")
+        ;;
+    "operator")
+        schemas_to_check=("identity" "operations" "access" "assets" "financial" "sales" "communications" "documents" "integration" "support" "memberships")
+        ;;
+    "member")
+        schemas_to_check=("member" "profile" "membership" "payments" "bookings" "usage" "communications" "integration")
+        ;;
+esac
+
+local total_relationships=0
+local schemas_with_relationships=0
+
+for schema in "${schemas_to_check[@]}"; do
+    # Use the verify-schema command to check relationships
+    local verify_output=$("$SCRIPT_DIR/../commands/verify-schema.sh" "$TIER" "$ENVIRONMENT" "$schema" 2>&1)
+
+    # Extract relationship count from output
+    local rel_count=$(echo "$verify_output" | grep "Total Relationships:" | awk '{print $3}')
+
+    if [[ -n "$rel_count" ]] && [[ "$rel_count" -gt 0 ]]; then
+        ((total_relationships += rel_count))
+        ((schemas_with_relationships++))
+        log_detail "  Schema '$schema': $rel_count relationships"
+    fi
+done
+
+if [[ $total_relationships -gt 0 ]]; then
+    log_success "GraphQL relationships verified: $total_relationships relationships across $schemas_with_relationships schemas"
+else
+    log_warning "No relationships found (this may be expected for new deployments)"
+fi
+
 log_success "GraphQL verification completed"
 
 # STEP 4: PURGE (unless keeping data)

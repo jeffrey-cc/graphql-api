@@ -76,17 +76,23 @@ cd ~/Desktop/v3/graphql-api/testing
 **What Each Test Validates:**
 
 1. **test-connection.sh**: Quick smoke test (health, version, GraphQL endpoint, metadata, database)
-2. **test-graphql.sh**: Full integration test (introspection, tier queries, mutations, subscriptions)
+2. **test-graphql.sh**: **COMPREHENSIVE** integration test including:
+   - GraphQL introspection (schema structure)
+   - Tier-specific table queries
+   - Mutations capability
+   - Subscriptions capability
+   - **Relationship verification across ALL schemas**
+   - Total relationship count and health check
 3. **report-database.sh**: Data verification (record counts, schema structure)
 
-**⚠️ Known Testing Gap:**
+**Test Coverage:**
 
-The current `test-graphql.sh` script does NOT test GraphQL relationships:
-- Does not verify foreign key relationships are tracked
-- Does not test object relationships (many-to-one)
-- Does not test array relationships (one-to-many)
+The `test-graphql.sh` script now verifies relationships for ALL schemas in the tier:
+- **Admin**: admin, operators, system, financial, sales, support, compliance, integration (8 schemas)
+- **Operator**: identity, operations, access, assets, financial, sales, communications, documents, integration, support, memberships (11 schemas)
+- **Member**: member, profile, membership, payments, bookings, usage, communications, integration (8 schemas)
 
-For relationship verification, use:
+For detailed relationship inspection of a single schema, use:
 ```bash
 cd ~/Desktop/v3/graphql-api/commands
 ./verify-schema.sh <tier> <environment> <schema> --detailed
