@@ -105,6 +105,9 @@ if ! load_tier_config "$TIER" "$ENVIRONMENT"; then
     log_warning "Could not load tier configuration, using defaults"
 fi
 
+# Configure endpoint for the tier and environment
+configure_endpoint "$TIER" "$ENVIRONMENT"
+
 # Check prerequisites
 check_prerequisites
 

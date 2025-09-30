@@ -119,7 +119,9 @@ start_timer
 # Delegate to shared database system
 log_progress "Delegating to shared database purge system..."
 
-SHARED_DB_PURGE="../shared-database-sql/testing/purge-data.sh"
+# Calculate absolute path to database-sql (sibling of graphql-api)
+SHARED_DB_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")/database-sql"
+SHARED_DB_PURGE="$SHARED_DB_DIR/testing/purge-data.sh"
 
 if [[ ! -f "$SHARED_DB_PURGE" ]]; then
     die "Shared database purge script not found: $SHARED_DB_PURGE"

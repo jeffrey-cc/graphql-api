@@ -111,8 +111,8 @@ log_info "Database: $DB_TIER_DATABASE at localhost:$DB_TIER_PORT"
 start_timer
 
 # Check that test-data directory exists
-TIER_REPO_PATH="./$TIER-graphql-api"
-TEST_DATA_PATH="$TIER_REPO_PATH/test-data"
+# Use TIER_REPOSITORY_PATH from shared functions (already set via configure_tier)
+TEST_DATA_PATH="$TIER_REPOSITORY_PATH/test-data"
 
 if [[ ! -d "$TEST_DATA_PATH" ]]; then
     log_error "❌ Test data directory not found: $TEST_DATA_PATH"
@@ -136,20 +136,21 @@ fi
 # Delegate to shared database system
 log_progress "Using shared database system to load test data..."
 
-SHARED_DB_DIR="../shared-database-sql"
-SHARED_DB_LOADER="$SHARED_DB_DIR/testing/load-test-data.sh"
+# Calculate absolute path to database-sql (sibling of graphql-api)
+SHARED_DB_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")/database-sql"
+SHARED_DB_LOADER="$SHARED_DB_DIR/testing/load-test-data-csv.sh"
 
 if [[ ! -f "$SHARED_DB_LOADER" ]]; then
     log_error "❌ Shared database test data loader not found: $SHARED_DB_LOADER"
     log_error ""
     log_error "REQUIRED ACTION:"
-    log_error "  Ensure shared-database-sql repository is available at:"
+    log_error "  Ensure database-sql repository is available at:"
     log_error "  $SHARED_DB_DIR"
     die "Cannot proceed without shared database system"
 fi
 
 # Create temporary symlink to our test data
-TEMP_LINK="$SHARED_DB_DIR/database-$TIER-sql/test-data-graphql-temp"
+TEMP_LINK="$SHARED_DB_DIR/$TIER-database-sql/test-data-graphql-temp"
 if [[ -L "$TEMP_LINK" ]]; then
     rm -f "$TEMP_LINK"
 fi
@@ -160,9 +161,9 @@ ln -sf "$(cd "$TEST_DATA_PATH" && pwd)" "$TEMP_LINK"
 # Modify the shared loader to use our test data temporarily
 log_detail "Loading test data via shared database system..."
 
-# Execute shared database loader with tier parameters
+# Execute shared database CSV loader with tier parameters
 cd "$SHARED_DB_DIR"
-if ./testing/load-test-data.sh "$TIER" "$ENVIRONMENT" $VERBOSE_FLAG $FORCE_FLAG; then
+if ./testing/load-test-data-csv.sh "$TIER" "$ENVIRONMENT" $VERBOSE_FLAG $FORCE_FLAG; then
     load_exit_code=0
     log_success "✅ Test data loaded successfully"
 else
