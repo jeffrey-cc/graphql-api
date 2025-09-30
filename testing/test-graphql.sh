@@ -11,8 +11,8 @@
 set -e
 
 # Source shared functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../commands/_shared_functions.sh"
+TEST_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$TEST_SCRIPT_DIR/../commands/_shared_functions.sh"
 
 # Show help information
 show_help() {
@@ -129,7 +129,7 @@ fi
 # STEP 1: PURGE (unless skipped)
 if [[ "$SKIP_PURGE" != "true" ]]; then
     log_progress "Step 1/4: PURGE - Removing existing test data..."
-    if ! "$SCRIPT_DIR/purge-test-data.sh" "$TIER" "$ENVIRONMENT"; then
+    if ! "$TEST_SCRIPT_DIR/purge-test-data.sh" "$TIER" "$ENVIRONMENT"; then
         die "Failed to purge test data"
     fi
     log_success "Test data purged successfully"
@@ -139,7 +139,7 @@ fi
 
 # STEP 2: LOAD
 log_progress "Step 2/4: LOAD - Loading tier-specific test data..."
-if ! "$SCRIPT_DIR/load-test-data.sh" "$TIER" "$ENVIRONMENT"; then
+if ! "$TEST_SCRIPT_DIR/load-test-data.sh" "$TIER" "$ENVIRONMENT"; then
     die "Failed to load test data"
 fi
 log_success "Test data loaded successfully"
@@ -275,7 +275,7 @@ log_success "GraphQL verification completed"
 # STEP 4: PURGE (unless keeping data)
 if [[ "$KEEP_DATA" != "true" ]]; then
     log_progress "Step 4/4: PURGE - Cleaning up test data..."
-    if ! "$SCRIPT_DIR/purge-test-data.sh" "$TIER" "$ENVIRONMENT"; then
+    if ! "$TEST_SCRIPT_DIR/purge-test-data.sh" "$TIER" "$ENVIRONMENT"; then
         log_warning "Failed to clean up test data"
     else
         log_success "Test data cleaned up successfully"
