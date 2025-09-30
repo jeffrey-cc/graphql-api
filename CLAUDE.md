@@ -1,5 +1,18 @@
 # GraphQL API - Testing Commands
 
+## Testing Methodology - CRITICAL
+
+**⚠️ NEVER USE MANUAL CURL COMMANDS FOR TESTING**
+
+Always use the provided test scripts. They are:
+- **Repeatable**: Anyone can run the exact same commands
+- **Documented**: Scripts have `--help` flags and are version controlled
+- **Comprehensive**: Test multiple aspects of the system
+- **Maintainable**: Update automatically when schema changes
+- **Source of Truth**: Define what "working" means
+
+Manual curl commands are one-off, undocumented tests that aren't repeatable or maintainable.
+
 ## Testing GraphQL Services
 
 The GraphQL API has comprehensive testing scripts located in `./testing/`:
@@ -42,23 +55,41 @@ The GraphQL API has comprehensive testing scripts located in `./testing/`:
 
 ### Testing Workflow
 
-For a complete GraphQL test:
+**Proper testing sequence:**
 
 ```bash
-# 1. Start database
+# 1. Database Layer
 cd ~/Desktop/v3/database-sql/commands
-./docker-start.sh admin
+./test-connection.sh admin development      # Verify database is running
+./report-database.sh admin development      # Check data is present
 
-# 2. Start GraphQL
-cd ~/Desktop/v3/graphql-api/commands
-./docker-start.sh admin development
-
-# 3. Test connection
+# 2. GraphQL Layer - Connection Only
 cd ~/Desktop/v3/graphql-api/testing
-./test-connection.sh admin development
+./test-connection.sh admin development      # 5 connection tests (health, version, endpoints)
 
-# 4. Run full test suite (if needed)
-./test-graphql.sh admin development
+# 3. GraphQL Layer - Full Test Suite
+./test-graphql.sh admin development         # Complete PURGE → LOAD → VERIFY → PURGE workflow
+# OR for debugging without cleanup:
+./test-graphql.sh admin development --skip-purge --keep-data
+```
+
+**What Each Test Validates:**
+
+1. **test-connection.sh**: Quick smoke test (health, version, GraphQL endpoint, metadata, database)
+2. **test-graphql.sh**: Full integration test (introspection, tier queries, mutations, subscriptions)
+3. **report-database.sh**: Data verification (record counts, schema structure)
+
+**⚠️ Known Testing Gap:**
+
+The current `test-graphql.sh` script does NOT test GraphQL relationships:
+- Does not verify foreign key relationships are tracked
+- Does not test object relationships (many-to-one)
+- Does not test array relationships (one-to-many)
+
+For relationship verification, use:
+```bash
+cd ~/Desktop/v3/graphql-api/commands
+./verify-schema.sh <tier> <environment> <schema> --detailed
 ```
 
 ## Recent Fixes
